@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "tutorial-builder": {
+      "commandName": "Project",
+      "workingDirectory": "d:\\dev\\LightBDD.Tutorials\\"
+    }
+  }
+}
