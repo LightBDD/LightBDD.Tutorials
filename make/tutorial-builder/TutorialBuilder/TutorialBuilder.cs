@@ -64,11 +64,14 @@ namespace TutorialBuilder
 
         private IReadOnlyDictionary<string, Func<ReplacementToken, string>> GetTokenProcessors()
         {
+            var typeSourceProvider = new TypeSourceProvider(_directory);
+
             return new Dictionary<string, Func<ReplacementToken, string>>
             {
                 {"link", new PathLinkProvider(_directory).Provide},
-                {"interface", new TypeSourceProvider(_directory).Provide},
-                {"class", new TypeSourceProvider(_directory).Provide}
+                {"interface", typeSourceProvider.ProvideType},
+                {"class", typeSourceProvider.ProvideType},
+                {"method", typeSourceProvider.ProvideMethod}
             };
         }
     }

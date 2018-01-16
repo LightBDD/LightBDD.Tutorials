@@ -1,15 +1,26 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 
 namespace TutorialBuilder
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            foreach (var directory in Directory.EnumerateDirectories(Directory.GetCurrentDirectory()).Where(TutorialBuilder.ContainsTutorial))
+            try
             {
-                new TutorialBuilder(directory).TryBuild();
+                foreach (var directory in Directory.EnumerateDirectories(Directory.GetCurrentDirectory()).Where(TutorialBuilder.ContainsTutorial))
+                {
+                    new TutorialBuilder(directory).TryBuild();
+                }
+
+                return 0;
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
+                return 1;
             }
         }
     }

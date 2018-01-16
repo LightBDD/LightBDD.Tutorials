@@ -2,7 +2,7 @@
   "profiles": {
     "tutorial-builder": {
       "commandName": "Project",
-      "workingDirectory": "d:\\dev\\LightBDD.Tutorials\\"
+      "workingDirectory": "d:\\dev\\LightBDD.Tutorials\\tutorials\\"
     }
   }
 }

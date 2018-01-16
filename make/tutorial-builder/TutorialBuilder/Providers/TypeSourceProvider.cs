@@ -9,27 +9,47 @@ namespace TutorialBuilder.Providers
 {
     public class TypeSourceProvider
     {
-        private readonly Dictionary<string, string> _sources;
+        private readonly Dictionary<string, SourceScope> _sources;
 
         public TypeSourceProvider(string directory)
         {
             _sources = Directory.EnumerateFileSystemEntries(directory, "*.cs", SearchOption.AllDirectories)
                 .Where(path => !path.Contains("\\obj\\"))
-                .ToDictionary(path => PathUtils.MakeRelative(path, directory), File.ReadAllText);
+                .ToDictionary(
+                    path => PathUtils.MakeRelative(path, directory),
+                    path => new SourceScope(File.ReadAllText(path)));
         }
 
-        public string Provide(ReplacementToken token)
+        public string ProvideType(ReplacementToken token)
         {
-            var regex = GetTypeSearchRegex(token.Type, token.Path);
-            foreach (var source in _sources)
-            {
-                var match = new SourceScope(source.Value).TryFind(regex);
-                if (match != null)
-                {
-                    return ExtractSource(token, source, match);
-                }
-            }
+            return ProvideBlock(token, _sources.FindInMany(GetTypeSearchRegex(token.Type, token.Path)));
+        }
+
+        private string ProvideBlock(ReplacementToken token, IEnumerable<KeyValuePair<string, SourceScope>> search)
+        {
+            var match = search.FirstOrDefault();
+
+            if (match.Value != null)
+                return ExtractSource(match.Key, match.Value);
+
             throw new InvalidOperationException($"Unable to locate {token.Type} {token.Path}");
+        }
+
+        public string ProvideMethod(ReplacementToken token)
+        {
+            var pathParts = token.Path.Split('.');
+            if (pathParts.Length != 2)
+                throw new InvalidOperationException($"Wrong {token.Type} path format: {token.Path}");
+
+            var typeRegex = GetTypeSearchRegex("\\w+", pathParts[0]);
+            var methodRegex = GetMethodSearchRegex(pathParts[1]);
+
+            return ProvideBlock(token, _sources.FindInMany(typeRegex).FindInMany(methodRegex));
+        }
+
+        private static Regex GetMethodSearchRegex(string name)
+        {
+            return new Regex($"(^[\\ \\t]*\\[[^\\]]+\\]\\s*\\n)*^[\\ \\t]*(\\w+[\\ \\t])*[\\(\\),<>\\w\\ \\t]+[\\ \\t]+{name}\\s*(<[\\ \\t\\w,<>\\(\\)]>)?\\s*\\([\\(\\),=<>\\w\\ \\t]*\\)\\s*[\\(\\),:<>\\w\\ \\t]*\\s*\\{{", RegexOptions.Multiline);
         }
 
         private static Regex GetTypeSearchRegex(string type, string name)
@@ -37,7 +57,7 @@ namespace TutorialBuilder.Providers
             return new Regex($"(^[\\ \\t]*\\[[^\\]]+\\]\\s*\\n)*^[\\ \\t]*(\\w+[\\ \\t])*{type}[\\ \\t]+{name}\\s+", RegexOptions.Multiline);
         }
 
-        private string ExtractSource(ReplacementToken token, KeyValuePair<string, string> source, SourceScope match)
+        private string ExtractSource(string sourcePath, SourceScope match)
         {
             var whiteChars = match.CountWhiteChars();
             var code = match.Substring();
@@ -45,7 +65,7 @@ namespace TutorialBuilder.Providers
 ```c#
 {ShiftLeft(code, whiteChars)}
 ```
-(see source [here]({source.Key}#L{match.GetStartingLine()}))
+(see source [here]({sourcePath}#L{match.GetStartingLine()}))
 
 ";
         }
@@ -62,64 +82,6 @@ namespace TutorialBuilder.Providers
             }
 
             return sb.ToString().Trim();
-        }
-    }
-
-    static class FormattedCodeBlockSearch
-    {
-        public static SourceScope TryFind(this SourceScope scope, Regex startPattern)
-        {
-            var startMatch = startPattern.Match(scope.Source, scope.Start, scope.Length);
-            if (!startMatch.Success)
-                return null;
-
-            var whiteChars = CountWhiteChars(startMatch.Value);
-            var endPattern = new Regex($"^\\s{{{whiteChars}}}\\}}", RegexOptions.Multiline);
-            var startMatchEndIndex = startMatch.Index + startMatch.Length;
-            var endMatch = endPattern.Match(scope.Source, startMatchEndIndex, scope.Length - startMatchEndIndex);
-
-            if (!endMatch.Success)
-                return null;
-            return new SourceScope(scope.Source, startMatch.Index, endMatch.Index + endMatch.Length - startMatch.Index);
-        }
-
-        public static int CountWhiteChars(this string block, int index = 0)
-        {
-            return block.Skip(index).TakeWhile(char.IsWhiteSpace).Count();
-        }
-    }
-
-    class SourceScope
-    {
-        public string Source { get; }
-        public int Start { get; }
-        public int Length { get; }
-
-        public SourceScope(string source)
-            : this(source, 0, source.Length)
-        {
-        }
-
-        public SourceScope(string source, int start, int length)
-        {
-            Source = source;
-            Start = start;
-            Length = length;
-        }
-
-        public int CountWhiteChars()
-        {
-            return Source.CountWhiteChars(Start);
-        }
-
-        public string Substring()
-        {
-            return Source.Substring(Start, Length);
-        }
-
-        public int GetStartingLine()
-        {
-            return Source.Take(Start).Count(x => x == '\n') + 1;
         }
     }
 }
