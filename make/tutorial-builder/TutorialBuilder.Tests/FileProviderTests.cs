@@ -5,7 +5,7 @@ using TutorialBuilder.Providers;
 namespace TutorialBuilder.Tests
 {
     [TestFixture]
-    public class PathLinkProviderTests
+    public class FileProviderTests
     {
         [Test]
         public void It_should_provide_link_to_directory()
@@ -37,9 +37,22 @@ namespace TutorialBuilder.Tests
             Assert.Throws<InvalidOperationException>(() => ProvideLinkFor("something.cs", null));
         }
 
+        [Test]
+        public void It_should_provide_content()
+        {
+            Assert.That(ProvideContentFor("SubFolder\\file.txt"),
+                Is.EqualTo(@"some content
+other line"));
+        }
+
+        private static string ProvideContentFor(string path)
+        {
+            return new FileProvider(new Context(TestHelper.TestSourceDirectory, TestHelper.TestSourceDirectory,"http://foo")).ProvideContent(new ReplacementToken(0, 0, "content", null, path));
+        }
+
         private static string ProvideLinkFor(string path, string named)
         {
-            return new PathLinkProvider(TestHelper.TestSourceDirectory).Provide(new ReplacementToken(0, 0, "link", named, path));
+            return new FileProvider(new Context(TestHelper.TestSourceDirectory, TestHelper.TestSourceDirectory,"http://foo")).ProvideLink(new ReplacementToken(0, 0, "link", named, path));
         }
     }
 }

@@ -10,7 +10,7 @@ namespace TutorialBuilder
     internal class TutorialCompiler
     {
         private readonly IReadOnlyDictionary<string, Func<ReplacementToken, string>> _tokenProcessors;
-        private static readonly Regex TokenRegex = new Regex("%%(\\w+){((\\w+)\\|)?([^}]+)}%%", RegexOptions.Compiled);
+        private static readonly Regex TokenRegex = new Regex("%%(\\w+){((\\w*)\\|)?([^}]+)}%%", RegexOptions.Compiled);
 
         public TutorialCompiler(IReadOnlyDictionary<string, Func<ReplacementToken, string>> tokenProcessors)
         {

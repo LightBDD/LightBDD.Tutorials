@@ -7,7 +7,7 @@ namespace TutorialBuilder.Providers
 {
     static class FormattedCodeBlockSearch
     {
-        public static SourceScope TryFind(this SourceScope scope, Regex startPattern)
+        public static SourceScope TryFindBlock(this SourceScope scope, Regex startPattern)
         {
             var startMatch = startPattern.Match(scope.Source, scope.Start, scope.Length);
             if (!startMatch.Success)
@@ -28,10 +28,10 @@ namespace TutorialBuilder.Providers
             return block.Skip(index).TakeWhile(Char.IsWhiteSpace).Count();
         }
 
-        public static IEnumerable<KeyValuePair<string, SourceScope>> FindInMany(this IEnumerable<KeyValuePair<string, SourceScope>> sources, Regex regex)
+        public static IEnumerable<KeyValuePair<string, SourceScope>> FindBlockInMany(this IEnumerable<KeyValuePair<string, SourceScope>> sources, Regex regex)
         {
             return sources
-                .Select(x => new KeyValuePair<string, SourceScope>(x.Key, x.Value.TryFind(regex)))
+                .Select(x => new KeyValuePair<string, SourceScope>(x.Key, x.Value.TryFindBlock(regex)))
                 .Where(x => x.Value != null);
         }
     }

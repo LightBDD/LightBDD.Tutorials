@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TutorialBuilder.Providers
 {
@@ -33,6 +34,14 @@ namespace TutorialBuilder.Providers
         public int GetStartingLine()
         {
             return Source.Take(Start).Count(x => x == '\n') + 1;
+        }
+
+        public SourceScope TryFindExact(Regex regex)
+        {
+            var match = regex.Match(Source, Start, Length);
+            if (!match.Success)
+                return null;
+            return new SourceScope(Source, match.Index, match.Length);
         }
     }
 }

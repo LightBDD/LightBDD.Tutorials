@@ -42,3 +42,50 @@ We can now re-run the tests and see that it still works as expected, however the
 If we follow the same approach to refactor other tests, we will end up with code looking more or less like this: %%class{CustomerServiceTests_with_extracted_steps}%% **find better name!!**
 
 ### 2. Install LightBDD
+
+Now, it is time to install LightBDD. As tests are written with xunit, I will install **LightBDD.XUnit2** package. In new csproj format, it is a matter of adding following line: %%text{|xml|CustomerManagement.Tests.csproj|<PackageReference Include="LightBDD.XUnit2" Version="[^"]+" />}%%
+In old csprojs, it is a matter of installing this package with Nuget.
+
+### 3. Convert tests to Scenarios
+
+As tests have been refactored to a behavioral style, converting them to scenarios is simple and consists of following steps:
+1. Making test class inherriting `FeatureFixture` base class,
+2. Changing `[Fact]` or `[Theory]` attributes to `[Scenario]`,
+3. Wrapping all steps in one of `Runner.RunScenario*` method. For simplicity, I'll use basic scenario syntax and `Runner.RunScenario()` from `LightBDD.Framework.Scenarios.Basic` namespace.
+
+Let's take a look on the sample test before and after conversion.
+
+Before it looked like this: %%method{CustomerServiceTests.CreatingCustomer}%%
+After change, it looks like this: %%method{Customer_management_feature.Creating_new_customer}%%
+
+After changing all the tests, the test class looks like this: %%class{Customer_management_feature}%%
+
+In fact I have made a few more alterations here:
+* I renamed class and scenarios to use snake case and made the name focussing more on description of the feature and behaviors not the class under test,
+* I moved all the step methods and fields to a %%link{CustomerManagement.Tests\Customer_management_feature.Steps.cs}%% file in order to make scenarios easy to read.
+
+### 4. Run tests
+
+Before running the tests, we have to do one more small thing - add LightBDD scope (in order to enable LightBDD integration): %%text{|c#|Customer_management_feature.cs|\[assembly: LightBddScope\]}%%
+If you forget to add it and try running tests, they will fail with a message like this: `LightBddScopeAttribute is not defined in the project. Please ensure that following attribute, or attribute extending it is defined at assembly level: [assembly:LightBddScopeAttribute]`.
+
+Now we are ready to run the tests in exactly same way as before - we can use Visal Studio Test Explorer, Resharper or `dotnet xunit` command.
+
+After test run we can notice few additional differences.
+
+First of all, we will see all the steps printed in the test Output window or on console, including the step status and execution time.
+
+When tests are run with `dotnet xunit` command, we can observe steps execution progress in real time - the sample output of this command looks like that: 
+```
+%%content{test.log}%%
+```
+This tutorial bases on xunit, however other integrations also offers that functionality - see [LightBDD Test Framework Integrations](https://github.com/LightBDD/LightBDD/wiki/Test-Framework-Integrations) wiki page for more details.
+
+The second difference is that report files are created in directory where tests were executed (for this tutorial it will be in `CustomerManagement.Tests\bin\Debug\net46\Reports` directory).
+The sample FeaturesReport.html looks like that: %%directHtmlLink{CustomerManagement.Tests\bin\Debug\net46\Reports\FeaturesReport.html}%%
+
+### Summary
+
+As LightBDD integrates on top of the test frameworks, converting standard tests to LightBDD scenarios is rather a simple process - it is a matter of refactoring the tests to given-when-then step methods and wrapping them with LightBDD runner call.
+
+As soon as the tests are converted, their execution progress can be tracked on the console and they will be included in the html report file.

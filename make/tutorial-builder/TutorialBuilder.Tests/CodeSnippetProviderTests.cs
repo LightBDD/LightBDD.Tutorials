@@ -5,7 +5,7 @@ using TutorialBuilder.Tests.Samples.SubFolder;
 namespace TutorialBuilder.Tests
 {
     [TestFixture]
-    public class TypeSourceProviderTests
+    public class CodeSnippetProviderTests
     {
         [Test]
         public void It_should_return_code_snippet_for_class()
@@ -111,13 +111,13 @@ public string CallMeWithGeneric<T>(T input) where T : new()
 
         private static string ProvideSnippetForType(string type, string path)
         {
-            var provider = new TypeSourceProvider(TestHelper.TestSourceDirectory);
+            var provider = new CodeSnippetProvider(TestHelper.TestSourceDirectory);
             return provider.ProvideType(new ReplacementToken(0, 0, type, null, path));
         }
 
          private static string ProvideSnippetForMethod(string type, string path)
         {
-            var provider = new TypeSourceProvider(TestHelper.TestSourceDirectory);
+            var provider = new CodeSnippetProvider(TestHelper.TestSourceDirectory);
             return provider.ProvideMethod(new ReplacementToken(0, 0, type, null, path));
         }
 

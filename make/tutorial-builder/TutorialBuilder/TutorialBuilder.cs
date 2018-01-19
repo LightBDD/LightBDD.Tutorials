@@ -6,19 +6,36 @@ using TutorialBuilder.Providers;
 
 namespace TutorialBuilder
 {
+    public class Context
+    {
+        public Context(string inputDirectory, string output, string repoUrl)
+        {
+            InputDirectory = inputDirectory;
+            RepoUrl = repoUrl;
+            Name = Path.GetFileName(inputDirectory);
+            OutputDirectory = output + "\\" + Name;
+            Directory.CreateDirectory(OutputDirectory);
+        }
+
+        public string Name { get; }
+        public string InputDirectory { get; }
+        public string OutputDirectory { get; }
+        public string RepoUrl { get; set; }
+    }
+
     internal class TutorialBuilder
     {
         const string TutorialTemplateName = "tutorial.md";
-        private readonly string _directory;
+        private readonly Context _context;
 
-        public TutorialBuilder(string directory)
+        public TutorialBuilder(string directory, string output, string repoUrl)
         {
-            _directory = directory;
+            _context = new Context(directory, output,repoUrl);
         }
 
         public bool TryBuild()
         {
-            Console.WriteLine($"Building {_directory}...");
+            Console.WriteLine($"Building {_context.InputDirectory}...");
             try
             {
                 CompileSolution();
@@ -45,7 +62,7 @@ namespace TutorialBuilder
 
         private void RunProcess(string command, string args)
         {
-            var process = Process.Start(new ProcessStartInfo(command, args) { WorkingDirectory = _directory, UseShellExecute = false });
+            var process = Process.Start(new ProcessStartInfo(command, args) { WorkingDirectory = _context.InputDirectory, UseShellExecute = false });
             process.WaitForExit();
             if (process.ExitCode != 0)
                 throw new InvalidOperationException($"{command} {args} failed with code: {process.ExitCode}");
@@ -58,20 +75,23 @@ namespace TutorialBuilder
 
         private void CompileTutorial()
         {
-            File.WriteAllText($"{_directory}\\compiled_tutorial.md", new TutorialCompiler(GetTokenProcessors())
-                .Compile($"{_directory}\\{TutorialTemplateName}"));
+            File.WriteAllText($"{_context.OutputDirectory}\\tutorial.md", new TutorialCompiler(GetTokenProcessors())
+                .Compile($"{_context.InputDirectory}\\{TutorialTemplateName}"));
         }
 
         private IReadOnlyDictionary<string, Func<ReplacementToken, string>> GetTokenProcessors()
         {
-            var typeSourceProvider = new TypeSourceProvider(_directory);
+            var typeSourceProvider = new CodeSnippetProvider(_context.InputDirectory);
 
             return new Dictionary<string, Func<ReplacementToken, string>>
             {
-                {"link", new PathLinkProvider(_directory).Provide},
+                {"link", new FileProvider(_context).ProvideLink},
+                {"content", new FileProvider(_context).ProvideContent},
+                {"directHtmlLink", new FileProvider(_context).ProvideDirectHtmlLink},
                 {"interface", typeSourceProvider.ProvideType},
                 {"class", typeSourceProvider.ProvideType},
-                {"method", typeSourceProvider.ProvideMethod}
+                {"method", typeSourceProvider.ProvideMethod},
+                {"text", new TextSnippetProvider(_context.InputDirectory).ProvideSnippet}
             };
         }
     }

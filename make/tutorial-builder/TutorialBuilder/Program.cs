@@ -10,9 +10,12 @@ namespace TutorialBuilder
         {
             try
             {
-                foreach (var directory in Directory.EnumerateDirectories(Directory.GetCurrentDirectory()).Where(TutorialBuilder.ContainsTutorial))
+                var tutorials = Directory.GetCurrentDirectory() + "\\tutorials";
+                var output = Directory.GetCurrentDirectory() + "\\output";
+                Directory.CreateDirectory(output);
+                foreach (var directory in Directory.EnumerateDirectories(tutorials).Where(TutorialBuilder.ContainsTutorial))
                 {
-                    new TutorialBuilder(directory).TryBuild();
+                    new TutorialBuilder(directory,output, "https://github.com/LightBDD/LightBDD.Tutorials").TryBuild();
                 }
 
                 return 0;

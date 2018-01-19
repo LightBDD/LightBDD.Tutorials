@@ -7,13 +7,13 @@ using System.Text.RegularExpressions;
 
 namespace TutorialBuilder.Providers
 {
-    public class TypeSourceProvider
+    public class CodeSnippetProvider
     {
         private readonly Dictionary<string, SourceScope> _sources;
 
-        public TypeSourceProvider(string directory)
+        public CodeSnippetProvider(string directory)
         {
-            _sources = Directory.EnumerateFileSystemEntries(directory, "*.cs", SearchOption.AllDirectories)
+            _sources = Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories)
                 .Where(path => !path.Contains("\\obj\\"))
                 .ToDictionary(
                     path => PathUtils.MakeRelative(path, directory),
@@ -22,7 +22,7 @@ namespace TutorialBuilder.Providers
 
         public string ProvideType(ReplacementToken token)
         {
-            return ProvideBlock(token, _sources.FindInMany(GetTypeSearchRegex(token.Type, token.Path)));
+            return ProvideBlock(token, _sources.FindBlockInMany(GetTypeSearchRegex(token.Type, token.Path)));
         }
 
         private string ProvideBlock(ReplacementToken token, IEnumerable<KeyValuePair<string, SourceScope>> search)
@@ -44,7 +44,7 @@ namespace TutorialBuilder.Providers
             var typeRegex = GetTypeSearchRegex("\\w+", pathParts[0]);
             var methodRegex = GetMethodSearchRegex(pathParts[1]);
 
-            return ProvideBlock(token, _sources.FindInMany(typeRegex).FindInMany(methodRegex));
+            return ProvideBlock(token, _sources.FindBlockInMany(typeRegex).FindBlockInMany(methodRegex));
         }
 
         private static Regex GetMethodSearchRegex(string name)
