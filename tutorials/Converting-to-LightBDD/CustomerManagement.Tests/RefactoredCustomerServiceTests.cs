@@ -3,7 +3,7 @@ using Xunit;
 
 namespace CustomerManagement.Tests
 {
-    public class CustomerServiceTests_with_extracted_steps
+    public class RefactoredCustomerServiceTests
     {
         private ICustomerService _service;
         private CustomerCreateRequest _createRequest;
