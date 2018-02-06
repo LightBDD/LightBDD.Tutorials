@@ -6,9 +6,14 @@ namespace TutorialBuilder
     {
         public static string MakeRelative(string path, string directory)
         {
-            if(!path.StartsWith(directory))
+            if (!path.StartsWith(directory))
                 throw new InvalidOperationException($"'{path}' does not starts with '{directory}'");
             return path.Substring(directory.Length).Replace('\\', '/').TrimStart('/');
+        }
+
+        public static string MakeCodeUrl(Context context, string path)
+        {
+            return context.RepoUrl + "/blob/master/" + context.BaseDirectory + "/" + MakeRelative(path, context.InputDirectory);
         }
     }
 }

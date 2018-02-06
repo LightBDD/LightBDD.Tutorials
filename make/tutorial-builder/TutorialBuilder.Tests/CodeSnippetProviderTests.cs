@@ -19,7 +19,7 @@ internal abstract class My_class : List<string>, IDisposable
     }
 }
 ```
-(see source [here](SubFolder/SampleSourceFile.cs#L7))
+(source: [SubFolder/SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs#L7))
 
 ";
             AssertSnippet(ProvideSnippetForType("class", nameof(My_class)), expected);
@@ -37,7 +37,7 @@ public class MyAttribute : Attribute
     public int Prop { get; set; }
 }
 ```
-(see source [here](SubFolder/SampleSourceFile.cs#L14))
+(source: [SubFolder/SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs#L14))
 
 ";
             AssertSnippet(ProvideSnippetForType("class", nameof(MyAttribute)), expected);
@@ -54,7 +54,7 @@ interface IFoo
     void Bar();
 }
 ```
-(see source [here](SubFolder/SampleSourceFile.cs#L21))
+(source: [SubFolder/SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs#L21))
 
 ";
             AssertSnippet(ProvideSnippetForType("interface", nameof(IFoo)), expected);
@@ -71,7 +71,7 @@ public string CallMeNow()
     throw new NotImplementedException();
 }
 ```
-(see source [here](SubFolder/SampleSourceFile.cs#L56))
+(source: [SubFolder/SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs#L56))
 
 ";
             AssertSnippet(ProvideSnippetForMethod("method", $"{nameof(MyBiggerClass)}.{nameof(MyBiggerClass.CallMeNow)}"), expected);
@@ -87,7 +87,7 @@ public string CallMeWithDefault(int input = 0)
     throw new NotImplementedException();
 }
 ```
-(see source [here](SubFolder/SampleSourceFile.cs#L46))
+(source: [SubFolder/SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs#L46))
 
 ";
             AssertSnippet(ProvideSnippetForMethod("method", $"{nameof(MyBiggerClass)}.{nameof(MyBiggerClass.CallMeWithDefault)}"), expected);
@@ -103,7 +103,7 @@ public string CallMeWithGeneric<T>(T input) where T : new()
     throw new NotImplementedException();
 }
 ```
-(see source [here](SubFolder/SampleSourceFile.cs#L51))
+(source: [SubFolder/SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs#L51))
 
 ";
             AssertSnippet(ProvideSnippetForMethod("method", $"{nameof(MyBiggerClass)}.{nameof(MyBiggerClass.CallMeWithGeneric)}"), expected);
@@ -111,13 +111,13 @@ public string CallMeWithGeneric<T>(T input) where T : new()
 
         private static string ProvideSnippetForType(string type, string path)
         {
-            var provider = new CodeSnippetProvider(TestHelper.TestSourceDirectory);
+            var provider = new CodeSnippetProvider(TestHelper.Context);
             return provider.ProvideType(new ReplacementToken(0, 0, type, null, path));
         }
 
-         private static string ProvideSnippetForMethod(string type, string path)
+        private static string ProvideSnippetForMethod(string type, string path)
         {
-            var provider = new CodeSnippetProvider(TestHelper.TestSourceDirectory);
+            var provider = new CodeSnippetProvider(TestHelper.Context);
             return provider.ProvideMethod(new ReplacementToken(0, 0, type, null, path));
         }
 

@@ -6,31 +6,14 @@ using TutorialBuilder.Providers;
 
 namespace TutorialBuilder
 {
-    public class Context
-    {
-        public Context(string inputDirectory, string output, string repoUrl)
-        {
-            InputDirectory = inputDirectory;
-            RepoUrl = repoUrl;
-            Name = Path.GetFileName(inputDirectory);
-            OutputDirectory = output + "\\" + Name;
-            Directory.CreateDirectory(OutputDirectory);
-        }
-
-        public string Name { get; }
-        public string InputDirectory { get; }
-        public string OutputDirectory { get; }
-        public string RepoUrl { get; set; }
-    }
-
     internal class TutorialBuilder
     {
         const string TutorialTemplateName = "tutorial.md";
         private readonly Context _context;
 
-        public TutorialBuilder(string directory, string output, string repoUrl)
+        public TutorialBuilder(Context context)
         {
-            _context = new Context(directory, output,repoUrl);
+            _context = context;
         }
 
         public bool TryBuild()
@@ -75,13 +58,13 @@ namespace TutorialBuilder
 
         private void CompileTutorial()
         {
-            File.WriteAllText($"{_context.OutputDirectory}\\tutorial.md", new TutorialCompiler(GetTokenProcessors())
+            File.WriteAllText($"{_context.OutputDirectory}\\{_context.Name}.md", new TutorialCompiler(GetTokenProcessors())
                 .Compile($"{_context.InputDirectory}\\{TutorialTemplateName}"));
         }
 
         private IReadOnlyDictionary<string, Func<ReplacementToken, string>> GetTokenProcessors()
         {
-            var typeSourceProvider = new CodeSnippetProvider(_context.InputDirectory);
+            var typeSourceProvider = new CodeSnippetProvider(_context);
 
             return new Dictionary<string, Func<ReplacementToken, string>>
             {

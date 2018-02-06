@@ -5,6 +5,5 @@ Define-Step -Name 'Compile tutorial builder' -Target 'all' -Body {
 }
 
 Define-Step -Name 'Compile tutorials' -Target 'all' -Body {
-	cd tutorials
-	call ..\make\TutorialBuilder.exe
+	call make\TutorialBuilder.exe
 }

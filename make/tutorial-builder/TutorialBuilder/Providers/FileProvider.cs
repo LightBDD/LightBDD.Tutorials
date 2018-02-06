@@ -15,7 +15,8 @@ namespace TutorialBuilder.Providers
         public string ProvideLink(ReplacementToken token)
         {
             var path = GetPath(token, true);
-            return $"[{token.Name}]({PathUtils.MakeRelative(path, _context.InputDirectory)})";
+            var url = PathUtils.MakeCodeUrl(_context, path);
+            return $"[{token.Name}]({url})";
         }
 
         public string ProvideContent(ReplacementToken token)
@@ -35,8 +36,8 @@ namespace TutorialBuilder.Providers
         {
             var path = GetPath(token, false);
             var fileName = Path.GetFileName(path);
-            File.Copy(path,_context.OutputDirectory+"\\"+fileName);
-            return $"[{fileName}](http://htmlpreview.github.io/?{_context.RepoUrl}/wiki/{_context.Name}/{fileName})";
+            File.Copy(path, _context.OutputDirectory + "\\" + fileName);
+            return $"[{fileName}](http://htmlpreview.github.io/?{_context.RepoRawWikiContentUrl}/{_context.Name}/{fileName})";
         }
     }
 }

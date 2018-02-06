@@ -12,7 +12,7 @@ namespace TutorialBuilder.Tests
         {
             Assert.That(
                 ProvideLinkFor("SubFolder", "foo"),
-                Is.EqualTo("[foo](SubFolder)"));
+                Is.EqualTo("[foo](https://github.com/foo/foo/blob/master/Samples/SubFolder)"));
         }
 
         [Test]
@@ -20,7 +20,7 @@ namespace TutorialBuilder.Tests
         {
             Assert.That(
                 ProvideLinkFor("SubFolder\\SampleSourceFile.cs", "bar"),
-                Is.EqualTo("[bar](SubFolder/SampleSourceFile.cs)"));
+                Is.EqualTo("[bar](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs)"));
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace TutorialBuilder.Tests
         {
             Assert.That(
                 ProvideLinkFor("SubFolder\\SampleSourceFile.cs", null),
-                Is.EqualTo("[SampleSourceFile.cs](SubFolder/SampleSourceFile.cs)"));
+                Is.EqualTo("[SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs)"));
         }
 
         [Test]
@@ -47,12 +47,12 @@ other line"));
 
         private static string ProvideContentFor(string path)
         {
-            return new FileProvider(new Context(TestHelper.TestSourceDirectory, TestHelper.TestSourceDirectory,"http://foo")).ProvideContent(new ReplacementToken(0, 0, "content", null, path));
+            return new FileProvider(TestHelper.Context).ProvideContent(new ReplacementToken(0, 0, "content", null, path));
         }
 
         private static string ProvideLinkFor(string path, string named)
         {
-            return new FileProvider(new Context(TestHelper.TestSourceDirectory, TestHelper.TestSourceDirectory,"http://foo")).ProvideLink(new ReplacementToken(0, 0, "link", named, path));
+            return new FileProvider(TestHelper.Context).ProvideLink(new ReplacementToken(0, 0, "link", named, path));
         }
     }
 }

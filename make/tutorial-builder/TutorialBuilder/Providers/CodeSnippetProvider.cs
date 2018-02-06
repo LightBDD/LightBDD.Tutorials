@@ -9,14 +9,16 @@ namespace TutorialBuilder.Providers
 {
     public class CodeSnippetProvider
     {
+        private readonly Context _context;
         private readonly Dictionary<string, SourceScope> _sources;
 
-        public CodeSnippetProvider(string directory)
+        public CodeSnippetProvider(Context context)
         {
-            _sources = Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories)
+            _context = context;
+            _sources = Directory.EnumerateFiles(context.InputDirectory, "*.cs", SearchOption.AllDirectories)
                 .Where(path => !path.Contains("\\obj\\"))
                 .ToDictionary(
-                    path => PathUtils.MakeRelative(path, directory),
+                    path => PathUtils.MakeRelative(path, context.InputDirectory),
                     path => new SourceScope(File.ReadAllText(path)));
         }
 
@@ -65,7 +67,7 @@ namespace TutorialBuilder.Providers
 ```c#
 {ShiftLeft(code, whiteChars)}
 ```
-(see source [here]({sourcePath}#L{match.GetStartingLine()}))
+(source: [{sourcePath}]({PathUtils.MakeCodeUrl(_context, _context.InputDirectory + sourcePath)}#L{match.GetStartingLine()}))
 
 ";
         }
