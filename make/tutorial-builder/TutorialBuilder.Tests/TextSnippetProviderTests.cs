@@ -13,7 +13,7 @@ namespace TutorialBuilder.Tests
 ```c#
 internal abstract class My_class : List<string>, IDisposable
 ```
-(see source [here](SubFolder/SampleSourceFile.cs#L7))
+(source: [SubFolder/SampleSourceFile.cs](https://github.com/foo/foo/blob/master/Samples/SubFolder/SampleSourceFile.cs#L7))
 
 ";
             AssertSnippet(ProvideSnippetForType("text", "c#|SampleSourceFile.cs|internal abstract class My_class : List<string>, IDisposable"), expected);
@@ -22,7 +22,7 @@ internal abstract class My_class : List<string>, IDisposable
 
         private static string ProvideSnippetForType(string type, string path)
         {
-            var provider = new TextSnippetProvider(TestHelper.TestSourceDirectory);
+            var provider = new TextSnippetProvider(TestHelper.Context);
             return provider.ProvideSnippet(new ReplacementToken(0, 0, type, null, path));
         }
 

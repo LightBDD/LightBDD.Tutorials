@@ -9,14 +9,16 @@ namespace TutorialBuilder.Providers
 {
     public class TextSnippetProvider
     {
+        private readonly Context _context;
         private readonly Dictionary<string, SourceScope> _sources;
 
-        public TextSnippetProvider(string directory)
+        public TextSnippetProvider(Context context)
         {
-            _sources = Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories)
+            _context = context;
+            _sources = Directory.EnumerateFiles(_context.InputDirectory, "*.*", SearchOption.AllDirectories)
                 .Where(path => !path.Contains("\\obj\\") && !path.Contains("\\bin\\") && !path.Contains("\\.vs\\"))
                 .ToDictionary(
-                    path => PathUtils.MakeRelative(path, directory),
+                    path => PathUtils.MakeRelative(path, _context.InputDirectory),
                     path => new SourceScope(File.ReadAllText(path)));
         }
 
@@ -41,7 +43,7 @@ namespace TutorialBuilder.Providers
 ```{snippetType}
 {ShiftLeft(code, whiteChars)}
 ```
-(see source [here]({sourcePath}#L{match.GetStartingLine()}))
+(source: [{sourcePath}]({PathUtils.MakeCodeUrl(_context, _context.InputDirectory + sourcePath)}#L{match.GetStartingLine()}))
 
 ";
         }

@@ -74,7 +74,7 @@ namespace TutorialBuilder
                 {"interface", typeSourceProvider.ProvideType},
                 {"class", typeSourceProvider.ProvideType},
                 {"method", typeSourceProvider.ProvideMethod},
-                {"text", new TextSnippetProvider(_context.InputDirectory).ProvideSnippet}
+                {"text", new TextSnippetProvider(_context).ProvideSnippet}
             };
         }
     }
