@@ -1,7 +1,7 @@
-﻿using System;
-using CustomerApi.ErrorHandling;
+﻿using CustomerApi.ErrorHandling;
 using CustomerApi.Models;
 using LiteDB;
+using System;
 
 namespace CustomerApi.Repositories
 {
@@ -37,23 +37,6 @@ namespace CustomerApi.Repositories
         public bool DeleteCustomer(Guid id)
         {
             return _collection.Delete(id);
-        }
-    }
-
-    internal class EmailAlreadyInUseException : ApiException
-    {
-        public EmailAlreadyInUseException() : base(ErrorCodes.EmailInUse,"Email already in use.")
-        {
-        }
-    }
-
-    internal class ApiException:InvalidOperationException
-    {
-        public string Code { get; }
-
-        public ApiException(string code, string message):base(message)
-        {
-            Code = code;
         }
     }
 }
