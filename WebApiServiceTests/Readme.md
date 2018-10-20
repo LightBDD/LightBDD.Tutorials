@@ -9,6 +9,13 @@ It consist of two projects:
 * [CustomerApi](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiServiceTests/CustomerApi) - AspNetCore WebApi project,
 * [CustomerApi.ServiceTests](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiServiceTests/CustomerApi.ServiceTests) - Service tests project based on xunit and LightBDD.
 
+## Quick run
+
+1. Open `cmd.exe` in solution directory
+2. Run [run-tests.cmd](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/run-tests.cmd).
+
+The command will run the tests and open the `FeaturesReport.html` produced in `CustomerApi.ServiceTests\bin\Debug\netcoreapp2.1\Reports\` directory.
+
 ## CustomerApi
 
 The CustomerApi is a sample AspNetCore WebApi project, generated with `dotnet new webapi` command and extended for the tutorial purpose with a sample stateful `/api/customers` endpoint.
