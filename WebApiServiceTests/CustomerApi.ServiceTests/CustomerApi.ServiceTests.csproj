@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <NoWarn>1998</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LightBDD.XUnit2" Version="2.4.3" />
