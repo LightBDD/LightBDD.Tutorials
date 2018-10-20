@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CustomerApi.Models;
-using CustomerApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
