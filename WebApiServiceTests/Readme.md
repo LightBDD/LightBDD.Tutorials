@@ -56,7 +56,8 @@ The [Shared Context between Tests](https://xunit.github.io/docs/shared-context.h
 ## Running all tests in parallel
 
 The xunit allows to run all the test classes in parallel by default (as long as they do not use `ICollectionFixture<T>`).  
-This project enables LightBDD specific test method level parallelization as well, with following code: `[assembly: ClassCollectionBehavior(AllowTestParallelization = true)]` (see [ConfiguredLightBddScope.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs#L4)).
+This project enables LightBDD specific test method level parallelization as well in [ConfiguredLightBddScope.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs#L4), with following code:  
+`[assembly: ClassCollectionBehavior(AllowTestParallelization = true)]`.
 
 It means that all the test methods specified in that project can run in parallel (please remember that by default the number of tests run in parallel reflects number of CPU cores in xunit).
 
