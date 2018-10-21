@@ -53,5 +53,146 @@ The [Shared Context between Tests](https://xunit.github.io/docs/shared-context.h
 * using `IClassFixture<T>` makes shared instance within the tests belonging to that class, but not between test classes themselves, which means many initializations of the service code,
 * using `ICollectionFixture<T>` will make one instance shared between all the tests and tests classes, but at the cost that none of the tests will run in parallel.
 
-## 
+## Running all tests in parallel
 
+The xunit allows to run all the test classes in parallel by default.  
+This project enables LightBDD specific test parallelization as well with code: `[assembly: ClassCollectionBehavior(AllowTestParallelization = true)]` (see [ConfiguredLightBddScope.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs#L4)).
+
+It means that all the tests specified in that project can run in parallel (please remember that by default the number of tests run in parallel reflects number of CPU cores in xunit).
+
+## Test features
+
+The test features are located in [Features](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiServiceTests/CustomerApi.ServiceTests/Features) directory.
+
+We can find here three features:
+* [Adding_customers](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.cs) feature testing `POST /api/customers` operation,
+* [Retrieving_customers](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Retrieving_customers.cs) feature testing `GET /api/customers/{id}` operation,
+* [Deleting_customers](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Deleting_customers.cs) feature testing `DELETE /api/customers/{id}` operation.
+
+Each feature class consists of two parts:
+* part defining the scenarios, like [Adding_customers.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.cs),
+* part defining the step methods and class state, like [Adding_customers.Steps.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.Steps.cs).
+
+All the scenarios in this example are asynchronous and uses [extended syntax](https://github.com/LightBDD/LightBDD/wiki/Scenario-Steps-Definition#extended-scenarios).
+
+All of the above scenarios are implemented in the similar way:
+* they are independent from each other,
+* they are written in a way that can be safely run in parallel,
+* they use steps defined in the same class (for simplicity),
+* they obtain `HttpClient` from the `TestServer` in the constructor like [here](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.Steps.cs#L22).
+
+## Sample scenario
+
+Let's take a look at [Adding_customers.Creating_a_new_customer()](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.cs#L19) scenario for example:
+```c#
+[Scenario]
+public async Task Creating_a_new_customer()
+{
+    await Runner.RunScenarioAsync(
+        _ => Given_a_valid_CreateCustomerRequest(),
+        _ => When_I_request_customer_creation(),
+        _ => Then_the_response_should_have_status_code(HttpStatusCode.Created),
+        _ => Then_the_response_should_have_customer_content(),
+        _ => Then_the_response_should_have_location_header(),
+        _ => Then_the_created_customer_should_contain_specified_customer_data(),
+        _ => Then_the_created_customer_should_contain_customer_Id());
+}
+```
+
+It describes successful creation of the new customer, where:
+* `Given_a_valid_CreateCustomerRequest()` step specifies that we are going to use a request with all the necessary information for creating the new customer resource,
+* `When_I_request_customer_creation()` step specifies actual `POST /api/customers` operation call on the Api,
+* `Then_...()` steps specifies a set of assertions performed on the reponse from the Api, including HTTP status code check, location headers as well as content of the response.
+
+This scenario is asynchronous using `Runner.RunScenarioAsync(...)` method, which means that all the step methods have to have signature returning `Task` type.
+
+Let's take a look now at the [Adding_customers.Steps.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.Steps.cs) part:
+
+```c#
+public partial class Adding_customers
+{
+    private readonly HttpClient _client;
+    private State<CreateCustomerRequest> _createCustomerRequest;
+    private State<HttpResponseMessage> _response;
+    private State<Customer> _createdCustomer;
+
+    public Adding_customers()
+    {
+        _client = TestServer.GetClient();
+    }
+
+    /* ... */
+}
+```
+
+As mentioned above, the `Adding_customers` class contains constructor where `HttpClient` is obtained.
+
+The class contains also a set of state fields that are used to share the scenario state between the steps. Please note that the fields uses `State<T>` struct that helps to ensure that fields are initialized before use. More about `State<T>` can be read on [Scenario State Management](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use) LightBDD wiki page.
+
+### Setting up the scenario context with `given` steps
+
+The `Given_a_valid_CreateCustomerRequest()` is defined as follows:
+```c#
+private async Task Given_a_valid_CreateCustomerRequest()
+{
+    _createCustomerRequest = new CreateCustomerRequest
+    {
+        Email = $"{Guid.NewGuid()}@mymail.com",
+        FirstName = "John",
+        LastName = "Smith"
+    };
+}
+```
+
+It is initializing the `_createCustomerRequest` field with a request allowing to create new customer.  
+Please note that even though the method is not really async, it is declared with `async` modifier and returns `Task`. It is because all the steps in the asynchronous scenario have to return `Task` type and `async` modifier allows to avoid `return Task.CompletedTask` statement.
+
+### Performing actions with `when` steps
+
+The `When_I_request_customer_creation()` step is quite simple as well, but contains few interesting bits:
+```c#
+private async Task When_I_request_customer_creation()
+{
+    _response = await _client.CreateCustomer(_createCustomerRequest.GetValue());
+}
+```
+
+The `_createCustomerRequest.GetValue()` obtains the value of the `State<CreateCustomerRequest> _createCustomerRequest` field, that was set in the `Given_a_valid_CreateCustomerRequest()` step. If the field value was not initialized before, the `GetValue()` will throw with message helping to identify this issue.
+
+The `_client.CreateCustomer()` is an extension method defined in [CustomerApiExtensions](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/CustomerApiExtensions.cs#L10) class. The `HttpClient` extensions pattern allows to extract the actual HTTP calls from the steps and reuse them in other steps and scenarios.
+
+Finally, the `HttpResponseMessage` is obtained asynchronously and captured in the `_response` field.
+
+### Verifying the scenario outcome with `then` steps
+
+The `then` steps are very similar to the previous ones in structure. The difference is that they should focus verify the scenario outcome.
+
+Let's take a look at few of those:
+```c#
+private async Task Then_the_response_should_have_status_code(HttpStatusCode code)
+{
+    Assert.Equal(code, _response.GetValue().StatusCode);
+}
+
+private async Task Then_the_response_should_have_location_header()
+{
+    Assert.NotNull(_response.GetValue().Headers.Location);
+}
+
+private async Task Then_the_response_should_have_customer_content()
+{
+    _createdCustomer = await _response.GetValue().DeserializeAsync<Customer>();
+}
+
+private async Task Then_the_created_customer_should_contain_specified_customer_data()
+{
+    var request = _createCustomerRequest.GetValue();
+    var customer = _createdCustomer.GetValue();
+
+    Assert.Equal(request.Email, customer.Email);
+    Assert.Equal(request.FirstName, customer.FirstName);
+    Assert.Equal(request.LastName, customer.LastName);
+}
+```
+
+As presented above, most of them have `Assert.` code inside. The `Then_the_response_should_have_customer_content()` step does not have explicit assert, but it deserializes the `HttpResponseMessage` content. The `DeserializeAsync<T>()` method is an extension method, defined in [JsonExtensions](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/JsonExtensions.cs#L15).
