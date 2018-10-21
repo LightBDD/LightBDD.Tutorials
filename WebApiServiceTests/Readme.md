@@ -1,7 +1,7 @@
 # Web Api Service Tests
 
 **Technologies:** AspNetCore, Swashbuckle, LiteDB  
-**LightBDD concepts:** partial classes, parallel execution, async steps, [State\<T>](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use), [tabular parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable)
+**LightBDD concepts:** partial classes, parallel execution, async steps, [State\<T>](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use), [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [tabular parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable)
 
 This is a sample solution showing how to use LightBDD to service test Web Api project.
 
@@ -263,4 +263,74 @@ SCENARIO: Creating customer with already used email is not allowed
   STEP 4/5: THEN the response should have status code "BadRequest"...
   STEP 4/5: THEN the response should have status code "BadRequest" (Passed after <1ms)
   ...
+```
+
+## Using tabular parameters
+
+The last feature presented in this tutorial is the usage of the tabular parameters (described on [Advanced Step Parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#tabular-parameters) LightBDD wiki page). We could already see it in the `Creating_customer_with_already_used_email_is_not_allowed()` scenario, however the `Creating_customer_with_missing_details_is_not_allowed()` will be better one to describe it.
+
+Let's take a look at it then:
+```c#
+[Scenario]
+public async Task Creating_customer_with_missing_details_is_not_allowed()
+{
+    await Runner.RunScenarioAsync(
+        _ => Given_a_CreateCustomerRequest_with_no_details(),
+        _ => When_I_request_customer_creation(),
+        _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
+        _ => Then_the_response_should_contain_errors(Table.ExpectData(
+            new Error(ErrorCodes.ValidationError, "The Email field is required."),
+            new Error(ErrorCodes.ValidationError, "The FirstName field is required."),
+            new Error(ErrorCodes.ValidationError, "The LastName field is required."))));
+}
+```
+
+This scenario focus on the `CreateCustomerRequest` data validation in `POST /api/customers` operation. If we do not provide any details in the `CreateCustomerRequest`, we should get a `400 BadRequest` with a list of validation error details. The tabular parameters helps with providing, validating and rendering them.
+
+Let's see the implementation of `Then_the_response_should_contain_errors()` step:
+```c#
+private async Task Then_the_response_should_contain_errors(VerifiableDataTable<Error> errors)
+{
+    var actual = await _response.GetValue().DeserializeAsync<Errors>();
+    errors.SetActual(actual.Items.OrderBy(x => x.Message));
+}
+```
+
+The step method accepts `VerifiableDataTable<Error> errors` parameter. It represents an expected collection of `Error` items that should be verified in the step body against the actual collection. In this particular step, the actual collection is a list of `Errors` deserialized from the `HttpResponseMessage` content.
+
+The expected-actual collection verification is performed by calling the `errors.SetActual(...)` method. 
+The verification is performed on the item properties level, which means that in this case, both, the error code and error message values will be verified.
+Please note here that the items are ordered before passing to `SetActual()` method - it is because, by default, the verification is performed in the item index order. More information on that behavior can be found on [Advanced Step Parameters # Verifiable Data Table](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable) wiki page.  
+Another thing to note here is that `SetActual()` method will not throw if verification fails - the verification outcome will be checked after the step method return instead, which allows to have multiple tabular parameters in the same step.
+
+Now, let's come back to the scenario itself and see how the parameter is passed:
+```c#
+_ => Then_the_response_should_contain_errors(Table.ExpectData(
+    new Error(ErrorCodes.ValidationError, "The Email field is required."),
+    new Error(ErrorCodes.ValidationError, "The FirstName field is required."),
+    new Error(ErrorCodes.ValidationError, "The LastName field is required.")))
+```
+
+The list of expected `Error` values is being built with `Table.ExpectData()` method, that takes the provided list and converts to the `VerifiableDataTable<Error>` instance.
+
+Running this scenario will produce a following example output on console:
+```
+SCENARIO: Creating customer with missing details is not allowed
+  STEP 1/4: GIVEN a CreateCustomerRequest with no details...
+  STEP 1/4: GIVEN a CreateCustomerRequest with no details (Passed after 20ms)
+  STEP 2/4: WHEN I request customer creation...
+  STEP 2/4: WHEN I request customer creation (Passed after 604ms)
+  STEP 3/4: THEN the response should have status code "BadRequest"...
+  STEP 3/4: THEN the response should have status code "BadRequest" (Passed after 4ms)
+  STEP 4/4: AND the response should contain errors "<table>"...
+  STEP 4/4: AND the response should contain errors "<table>" (Passed after 28ms)
+    errors:
+    +-+---------------+--------------------------------+
+    |#|Code           |Message                         |
+    +-+---------------+--------------------------------+
+    |=|ValidationError|The Email field is required.    |
+    |=|ValidationError|The FirstName field is required.|
+    |=|ValidationError|The LastName field is required. |
+    +-+---------------+--------------------------------+
+  SCENARIO RESULT: Passed after 781ms
 ```
