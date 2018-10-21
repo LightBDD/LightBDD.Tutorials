@@ -80,7 +80,7 @@ All of the above scenarios are implemented in the similar way:
 * they are independent from each other,
 * they are written in a way that can be safely run in parallel,
 * they use steps defined in the same class (for simplicity),
-* they obtain `HttpClient` from the `TestServer` in the constructor like [here](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.Steps.cs#L22).
+* they obtain `HttpClient` from the `TestServer` in the constructor like [here](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.Steps.cs#L21).
 
 ## Sample scenario
 
