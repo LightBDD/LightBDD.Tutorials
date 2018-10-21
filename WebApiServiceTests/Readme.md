@@ -43,4 +43,15 @@ The CustomerApi.ServiceTests uses LightBDD to run behavioral tests against Custo
 
 The `WebApplicationFactory<Startup>` is instantiated once for the whole test run. It is managed by [TestServer](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/TestServer.cs) static class, that offers a `GetClient()` method to obtain the `HttpClient` used later by tests.
 
-After all tests are finished, the `WebApplicationFactory<Startup>` is disposed, which is done in [ConfiguredLightBddScope.TearDown()](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs#L13) method.
+The instantiation and disposal of the `TestServer` is handled by the [ConfiguredLightBddScope](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs)  `OnSetUp()` and `OnTearDown()` methods, guaranteeing to execute once, before any and after all tests in the assembly.
+
+**Why the one test server instance is important?**  
+Well, the service tests treats the service as a black box, which means that when it is initialized, all potentially complex service startup have to be performed (including database connection, cache population, service warming-up routines and anything else that the service may be doing). Instantiating the `TestServer` per test or even per test class will introduce the unecessary overhead that will affect the test execution time...
+
+**Why this example does not use `IClassFixture<WebApplicationFactory<RazorPagesProject.Startup>>` pattern described on [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1) documentation?**  
+The [Shared Context between Tests](https://xunit.github.io/docs/shared-context.html) xunit documentation states that:
+* using `IClassFixture<T>` makes shared instance within the tests belonging to that class, but not between test classes themselves, which means many initializations of the service code,
+* using `ICollectionFixture<T>` will make one instance shared between all the tests and tests classes, but at the cost that none of the tests will run in parallel.
+
+## 
+
