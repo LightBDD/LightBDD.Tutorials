@@ -37,7 +37,7 @@ Finally, the [Swashbuckle Swagger](https://docs.microsoft.com/en-us/aspnet/core/
 
 ## CustomerApi.ServiceTests
 
-The CustomerApi.ServiceTests uses LightBDD to run behavioral tests against CustomerApi. All tests treats the Api as black box and uses only the Api endpoints to communicate. The `WebApplicationFactory<Startup>` is used from **Microsoft.AspNetCore.Mvc.Testing** package to spawn in-memory Api, following [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1) Microsoft docs.
+The CustomerApi.ServiceTests uses LightBDD to run behavioral tests against CustomerApi. All tests treats the Api as black box and uses only the Api endpoints to communicate. The `WebApplicationFactory<Startup>` is used from **Microsoft.AspNetCore.Mvc.Testing** package to spawn in-memory Api, following [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1) Microsoft documentation.
 
 ### One Test Server instance
 
@@ -46,7 +46,7 @@ The `WebApplicationFactory<Startup>` is instantiated once for the whole test run
 The instantiation and disposal of the `TestServer` is handled by the [ConfiguredLightBddScope](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs)  `OnSetUp()` and `OnTearDown()` methods, guaranteeing to execute once, before any and after all tests in the assembly.
 
 **Why the one test server instance is important?**  
-Well, the service tests treats the service as a black box, which means that when it is initialized, all potentially complex service startup have to be performed (including database connection, cache population, service warming-up routines and anything else that the service may be doing). Instantiating the `TestServer` per test or even per test class will introduce the unecessary overhead that will affect the test execution time...
+Well, the service tests treats the service as a black box, which means that when it is initialized, all potentially complex service startup has to be performed (including database initialization, cache population, service warming-up routines and anything else that the service may be doing during startup). Instantiating the `TestServer` per test or even per test class will introduce the unnecessary overhead that will affect the test execution time.
 
 **Why this example does not use `IClassFixture<WebApplicationFactory<RazorPagesProject.Startup>>` pattern described on [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1) documentation?**  
 The [Shared Context between Tests](https://xunit.github.io/docs/shared-context.html) xunit documentation states that:
@@ -55,10 +55,10 @@ The [Shared Context between Tests](https://xunit.github.io/docs/shared-context.h
 
 ## Running all tests in parallel
 
-The xunit allows to run all the test classes in parallel by default.  
-This project enables LightBDD specific test parallelization as well with code: `[assembly: ClassCollectionBehavior(AllowTestParallelization = true)]` (see [ConfiguredLightBddScope.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs#L4)).
+The xunit allows to run all the test classes in parallel by default (as long as they do not use `ICollectionFixture<T>`).  
+This project enables LightBDD specific test method level parallelization as well, with following code: `[assembly: ClassCollectionBehavior(AllowTestParallelization = true)]` (see [ConfiguredLightBddScope.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs#L4)).
 
-It means that all the tests specified in that project can run in parallel (please remember that by default the number of tests run in parallel reflects number of CPU cores in xunit).
+It means that all the test methods specified in that project can run in parallel (please remember that by default the number of tests run in parallel reflects number of CPU cores in xunit).
 
 ## Test features
 
@@ -102,9 +102,11 @@ public async Task Creating_a_new_customer()
 It describes successful creation of the new customer, where:
 * `Given_a_valid_CreateCustomerRequest()` step specifies that we are going to use a request with all the necessary information for creating the new customer resource,
 * `When_I_request_customer_creation()` step specifies actual `POST /api/customers` operation call on the Api,
-* `Then_...()` steps specifies a set of assertions performed on the reponse from the Api, including HTTP status code check, location headers as well as content of the response.
+* `Then_...()` steps specifies a set of assertions performed on the response from the Api, including HTTP status code check, location headers as well as content of the response.
 
 This scenario is asynchronous using `Runner.RunScenarioAsync(...)` method, which means that all the step methods have to have signature returning `Task` type.
+
+## Sample feature class definition
 
 Let's take a look now at the [Adding_customers.Steps.cs](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/Features/Adding_customers.Steps.cs) part:
 
@@ -165,7 +167,7 @@ Finally, the `HttpResponseMessage` is obtained asynchronously and captured in th
 
 ### Verifying the scenario outcome with `then` steps
 
-The `then` steps are very similar to the previous ones in structure. The difference is that they should focus verify the scenario outcome.
+The `then` steps are very similar in structure to the previous ones. The difference is that they should focus on verification of the scenario outcome.
 
 Let's take a look at few of those:
 ```c#
@@ -195,11 +197,11 @@ private async Task Then_the_created_customer_should_contain_specified_customer_d
 }
 ```
 
-As presented above, most of them have `Assert.` code inside. The `Then_the_response_should_have_customer_content()` step does not have explicit assert, but it deserializes the `HttpResponseMessage` content. The `DeserializeAsync<T>()` method is an extension method, defined in [JsonExtensions](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/JsonExtensions.cs#L15).
+As presented above, most of them have `Assert.Xxx()` code inside. The `Then_the_response_should_have_customer_content()` step does not have explicit assert, but it deserializes the `HttpResponseMessage` content into model. The `DeserializeAsync<T>()` method is an extension method, defined in [JsonExtensions](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/JsonExtensions.cs#L15).
 
 ## Using Composite Steps
 
-The `Creating_a_new_customer()` scenarion focuses on the customer creation process. Sometimes however, we need to write scenarios which focus on the behaviors after that stage. Let's take a look at this scenario:
+The `Creating_a_new_customer()` scenario focuses on the customer creation process. Sometimes however, we need to write scenarios which focus on the behaviors after that stage. Let's take a look at this scenario:
 
 ```c#
 [Scenario]
@@ -210,11 +212,12 @@ public async Task Creating_customer_with_already_used_email_is_not_allowed()
         _ => Given_a_CreateCustomerRequest_with_the_same_email_as_existing_customer(),
         _ => When_I_request_customer_creation(),
         _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
-        _ => Then_the_response_should_contain_errors(Table.ExpectData(new Error(ErrorCodes.EmailInUse, "Email already in use."))));
+        _ => Then_the_response_should_contain_errors(Table.ExpectData(
+            new Error(ErrorCodes.EmailInUse, "Email already in use."))));
 }
 ```
 
-This scenario bases on the fact that we already have an existing customer, but focus on what should happen if we try to create another one with the same email address.
+This scenario bases on the fact that we already have an existing customer. It focuses however on what should happen if we try to create another one with the same email address.
 
 The `Given_an_existing_customer()` step is really an equivalent of following steps from `Creating_a_new_customer()` scenario:
 
@@ -227,7 +230,7 @@ _ => Then_the_response_should_have_status_code(HttpStatusCode.Created),
 We have few options here what to do:
 1. we could just replace `Given_an_existing_customer()` with those three steps, however the scenario itself will become less readable and it will be more difficult to identify where is the focus here,
 2. we could implement the `Given_an_existing_customer()` as a normal method with the same code as those three steps have, but it would introduce code duplications and will make it harder to maintain,
-3. we could implement the `Given_an_existing_customer()` then to just call those 3 other steps. It will do the trick, but we will loose the visibility of what is exactly happening in the scenario,
+3. we could implement the `Given_an_existing_customer()` then to just call those 3 other steps. It will do the trick, but we will lose the visibility of what is exactly happening in the scenario,
 4. we could implement the `Given_an_existing_customer()` as a composite step.
 
 In this tutorial we went with last option, a composite step (described on [Composite Steps Definition](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition) LightBDD wiki page):
@@ -267,7 +270,8 @@ SCENARIO: Creating customer with already used email is not allowed
 
 ## Using tabular parameters
 
-The last feature presented in this tutorial is the usage of the tabular parameters (described on [Advanced Step Parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#tabular-parameters) LightBDD wiki page). We could already see it in the `Creating_customer_with_already_used_email_is_not_allowed()` scenario, however the `Creating_customer_with_missing_details_is_not_allowed()` will be better one to describe it.
+The last feature presented in this tutorial is the usage of the tabular parameters (described on [Advanced Step Parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#tabular-parameters) LightBDD wiki page).  
+We could already see it in the `Creating_customer_with_already_used_email_is_not_allowed()` scenario, however the `Creating_customer_with_missing_details_is_not_allowed()` will be better one to describe it.
 
 Let's take a look at it then:
 ```c#
@@ -299,7 +303,7 @@ private async Task Then_the_response_should_contain_errors(VerifiableDataTable<E
 The step method accepts `VerifiableDataTable<Error> errors` parameter. It represents an expected collection of `Error` items that should be verified in the step body against the actual collection. In this particular step, the actual collection is a list of `Errors` deserialized from the `HttpResponseMessage` content.
 
 The expected-actual collection verification is performed by calling the `errors.SetActual(...)` method. 
-The verification is performed on the item properties level, which means that in this case, both, the error code and error message values will be verified.
+The verification is performed on the item properties level, which means that in this case, both, the error code and error message values will be verified.  
 Please note here that the items are ordered before passing to `SetActual()` method - it is because, by default, the verification is performed in the item index order. More information on that behavior can be found on [Advanced Step Parameters # Verifiable Data Table](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable) wiki page.  
 Another thing to note here is that `SetActual()` method will not throw if verification fails - the verification outcome will be checked after the step method return instead, which allows to have multiple tabular parameters in the same step.
 
