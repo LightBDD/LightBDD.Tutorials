@@ -196,3 +196,71 @@ private async Task Then_the_created_customer_should_contain_specified_customer_d
 ```
 
 As presented above, most of them have `Assert.` code inside. The `Then_the_response_should_have_customer_content()` step does not have explicit assert, but it deserializes the `HttpResponseMessage` content. The `DeserializeAsync<T>()` method is an extension method, defined in [JsonExtensions](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/JsonExtensions.cs#L15).
+
+## Using Composite Steps
+
+The `Creating_a_new_customer()` scenarion focuses on the customer creation process. Sometimes however, we need to write scenarios which focus on the behaviors after that stage. Let's take a look at this scenario:
+
+```c#
+[Scenario]
+public async Task Creating_customer_with_already_used_email_is_not_allowed()
+{
+    await Runner.RunScenarioAsync(
+        _ => Given_an_existing_customer(),
+        _ => Given_a_CreateCustomerRequest_with_the_same_email_as_existing_customer(),
+        _ => When_I_request_customer_creation(),
+        _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
+        _ => Then_the_response_should_contain_errors(Table.ExpectData(new Error(ErrorCodes.EmailInUse, "Email already in use."))));
+}
+```
+
+This scenario bases on the fact that we already have an existing customer, but focus on what should happen if we try to create another one with the same email address.
+
+The `Given_an_existing_customer()` step is really an equivalent of following steps from `Creating_a_new_customer()` scenario:
+
+```c#
+_ => Given_a_valid_CreateCustomerRequest(),
+_ => When_I_request_customer_creation(),
+_ => Then_the_response_should_have_status_code(HttpStatusCode.Created),
+```
+
+We have few options here what to do:
+1. we could just replace `Given_an_existing_customer()` with those three steps, however the scenario itself will become less readable and it will be more difficult to identify where is the focus here,
+2. we could implement the `Given_an_existing_customer()` as a normal method with the same code as those three steps have, but it would introduce code duplications and will make it harder to maintain,
+3. we could implement the `Given_an_existing_customer()` then to just call those 3 other steps. It will do the trick, but we will loose the visibility of what is exactly happening in the scenario,
+4. we could implement the `Given_an_existing_customer()` as a composite step.
+
+In this tutorial we went with last option, a composite step (described on [Composite Steps Definition](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition) LightBDD wiki page):
+```c#
+private async Task<CompositeStep> Given_an_existing_customer()
+{
+    return CompositeStep.DefineNew()
+        .AddAsyncSteps(
+            _ => Given_a_valid_CreateCustomerRequest(),
+            _ => When_I_request_customer_creation(),
+            _ => Then_the_response_should_have_status_code(HttpStatusCode.Created))
+        .Build();
+}
+```
+
+This step behavior is very similar to *option 3* where we would just call those three steps from `Given_an_existing_customer()`, however it preserves the information on what is going on in the scenario.
+
+If we run this test in Visual Studio or with [run-tests.cmd](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/run-tests.cmd), we would see the difference on the console as well as in the `FeaturesReport.html`, where the sample output would be as follows:
+```
+SCENARIO: Creating customer with already used email is not allowed
+  STEP 1/5: GIVEN an existing customer...
+  STEP 1.1/1.3: GIVEN a valid CreateCustomerRequest...
+  STEP 1.1/1.3: GIVEN a valid CreateCustomerRequest (Passed after 5ms)
+  STEP 1.2/1.3: WHEN I request customer creation...
+  STEP 1.2/1.3: WHEN I request customer creation (Passed after 722ms)
+  STEP 1.3/1.3: THEN the response should have status code "Created"...
+  STEP 1.3/1.3: THEN the response should have status code "Created" (Passed after 4ms)
+  STEP 1/5: GIVEN an existing customer (Passed after 786ms)
+  STEP 2/5: AND a CreateCustomerRequest with the same email as existing customer...
+  STEP 2/5: AND a CreateCustomerRequest with the same email as existing customer (Passed after <1ms)
+  STEP 3/5: WHEN I request customer creation...
+  STEP 3/5: WHEN I request customer creation (Passed after 22ms)
+  STEP 4/5: THEN the response should have status code "BadRequest"...
+  STEP 4/5: THEN the response should have status code "BadRequest" (Passed after <1ms)
+  ...
+```
