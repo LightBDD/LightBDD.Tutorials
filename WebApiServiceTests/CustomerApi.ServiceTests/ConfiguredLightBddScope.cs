@@ -8,6 +8,11 @@ namespace CustomerApi.ServiceTests
 {
     internal class ConfiguredLightBddScopeAttribute : LightBddScopeAttribute
     {
+        protected override void OnSetUp()
+        {
+            TestServer.Initialize();
+        }
+
         protected override void OnTearDown()
         {
             TestServer.Dispose();
