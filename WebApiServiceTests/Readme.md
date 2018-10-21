@@ -36,3 +36,11 @@ The error handling is configured in [Startup.ConfigureServices()](https://github
 Finally, the [Swashbuckle Swagger](https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.1) has been added to the Api, allowing to play with it by going to `https://localhost:5001/` when application is running.
 
 ## CustomerApi.ServiceTests
+
+The CustomerApi.ServiceTests uses LightBDD to run behavioral tests against CustomerApi. All tests treats the Api as black box and uses only the Api endpoints to communicate. The `WebApplicationFactory<Startup>` is used from **Microsoft.AspNetCore.Mvc.Testing** package to spawn in-memory Api, following [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1) Microsoft docs.
+
+### One Test Server instance
+
+The `WebApplicationFactory<Startup>` is instantiated once for the whole test run. It is managed by [TestServer](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/TestServer.cs) static class, that offers a `GetClient()` method to obtain the `HttpClient` used later by tests.
+
+After all tests are finished, the `WebApplicationFactory<Startup>` is disposed, which is done in [ConfiguredLightBddScope.TearDown()](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs#L13) method.
