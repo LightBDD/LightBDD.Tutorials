@@ -3,6 +3,7 @@ using LightBDD.Framework;
 using LightBDD.Framework.Parameters;
 using LightBDD.Framework.Scenarios.Extended;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -90,7 +91,7 @@ namespace CustomerApi.ServiceTests.Features
         private async Task Then_the_response_should_contain_errors(VerifiableDataTable<Error> errors)
         {
             var actual = await _response.GetValue().DeserializeAsync<Errors>();
-            errors.SetActual(actual.Items);
+            errors.SetActual(actual.Items.OrderBy(x => x.Message));
         }
 
         private async Task Then_the_response_should_have_location_header()

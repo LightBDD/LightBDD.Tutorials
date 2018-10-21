@@ -37,8 +37,8 @@ I want to be able to add new customers")]
                 _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
                 _ => Then_the_response_should_contain_errors(Table.ExpectData(
                     new Error(ErrorCodes.ValidationError, "The Email field is required."),
-                    new Error(ErrorCodes.ValidationError, "The LastName field is required."),
-                    new Error(ErrorCodes.ValidationError, "The FirstName field is required."))));
+                    new Error(ErrorCodes.ValidationError, "The FirstName field is required."),
+                    new Error(ErrorCodes.ValidationError, "The LastName field is required."))));
         }
 
         [Scenario]
