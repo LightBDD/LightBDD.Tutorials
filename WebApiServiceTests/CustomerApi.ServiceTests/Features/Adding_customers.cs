@@ -4,7 +4,7 @@ using CustomerApi.ErrorHandling;
 using CustomerApi.Models;
 using LightBDD.Framework;
 using LightBDD.Framework.Parameters;
-using LightBDD.Framework.Scenarios.Extended;
+using LightBDD.Framework.Scenarios;
 using LightBDD.XUnit2;
 
 namespace CustomerApi.ServiceTests.Features

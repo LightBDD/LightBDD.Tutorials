@@ -14,7 +14,7 @@ It consist of two projects:
 1. Open `cmd.exe` in solution directory
 2. Run [run-tests.cmd](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/run-tests.cmd).
 
-The command will run the tests and open the `FeaturesReport.html` produced in `CustomerApi.ServiceTests\bin\Debug\netcoreapp2.1\Reports\` directory.
+The command will run the tests and open the `FeaturesReport.html` produced in `CustomerApi.ServiceTests\bin\Debug\netcoreapp2.2\Reports\` directory.
 
 ## CustomerApi
 
@@ -33,11 +33,11 @@ The repository does not allow to create multiple customers with the same email a
 * the exceptions are automatically converted to either `400` or `500` HTTP Status Code and `Errors` model by [HandleExceptionsFilterAttribute](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi/Filters/HandleExceptionsFilterAttribute.cs) method.
 The error handling is configured in [Startup.ConfigureServices()](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi/Startup.cs#L26).
 
-Finally, the [Swashbuckle Swagger](https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.1) has been added to the Api, allowing to play with it by going to `https://localhost:5001/` when application is running.
+Finally, the [Swashbuckle Swagger](https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.2) has been added to the Api, allowing to play with it by going to `https://localhost:5001/` when application is running.
 
 ## CustomerApi.ServiceTests
 
-The CustomerApi.ServiceTests uses LightBDD to run behavioral tests against CustomerApi. All tests treats the Api as black box and uses only the Api endpoints to communicate. The `WebApplicationFactory<Startup>` is used from **Microsoft.AspNetCore.Mvc.Testing** package to spawn in-memory Api, following [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1) Microsoft documentation.
+The CustomerApi.ServiceTests uses LightBDD to run behavioral tests against CustomerApi. All tests treats the Api as black box and uses only the Api endpoints to communicate. The `WebApplicationFactory<Startup>` is used from **Microsoft.AspNetCore.Mvc.Testing** package to spawn in-memory Api, following [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.2) Microsoft documentation.
 
 ### One Test Server instance
 
@@ -48,7 +48,7 @@ The instantiation and disposal of the `TestServer` is handled by the [Configured
 **Why the one test server instance is important?**  
 Well, the service tests treats the service as a black box, which means that when it is initialized, all potentially complex service startup has to be performed (including database initialization, cache population, service warming-up routines and anything else that the service may be doing during startup). Instantiating the `TestServer` per test or even per test class will introduce the unnecessary overhead that will affect the test execution time.
 
-**Why this example does not use `IClassFixture<WebApplicationFactory<RazorPagesProject.Startup>>` pattern described on [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1) documentation?**  
+**Why this example does not use `IClassFixture<WebApplicationFactory<RazorPagesProject.Startup>>` pattern described on [Integration tests in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.2) documentation?**  
 The [Shared Context between Tests](https://xunit.github.io/docs/shared-context.html) xunit documentation states that:
 * using `IClassFixture<T>` makes shared instance within the tests belonging to that class, but not between test classes themselves, which means many initializations of the service code,
 * using `ICollectionFixture<T>` will make one instance shared between all the tests and tests classes, but at the cost that none of the tests will run in parallel.

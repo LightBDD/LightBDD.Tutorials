@@ -1,7 +1,7 @@
 ﻿using CustomerApi.Models;
 using LightBDD.Framework;
 using LightBDD.Framework.Parameters;
-using LightBDD.Framework.Scenarios.Extended;
+using LightBDD.Framework.Scenarios;
 using System;
 using System.Linq;
 using System.Net;
