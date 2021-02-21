@@ -7,7 +7,7 @@ namespace CustomerApi.Repositories
 {
     internal class CustomerRepository : ICustomerRepository
     {
-        private readonly LiteCollection<Customer> _collection;
+        private readonly ILiteCollection<Customer> _collection;
 
         public CustomerRepository(LiteDatabase db)
         {

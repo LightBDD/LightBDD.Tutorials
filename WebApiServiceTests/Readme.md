@@ -14,7 +14,7 @@ It consist of two projects:
 1. Open `cmd.exe` in solution directory
 2. Run [run-tests.cmd](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/run-tests.cmd).
 
-The command will run the tests and open the `FeaturesReport.html` produced in `CustomerApi.ServiceTests\bin\Debug\netcoreapp2.2\Reports\` directory.
+The command will run the tests and open the `FeaturesReport.html` produced in `CustomerApi.ServiceTests\bin\Debug\net5\Reports\` directory.
 
 ## CustomerApi
 
