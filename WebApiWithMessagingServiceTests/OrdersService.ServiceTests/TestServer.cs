@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using LightBDD.Framework.Messaging;
 using Microsoft.AspNetCore.Mvc.Testing;
 using OrdersService.Messages;
 using Rebus.Activation;
 using Rebus.Bus;
 using Rebus.Config;
-using Rebus.Handlers;
 using Rebus.Persistence.FileSystem;
 using Rebus.Routing.TypeBased;
 using Rebus.Transport.FileSystem;
+using WireMock.Server;
 
 namespace OrdersService.ServiceTests
 {
@@ -22,6 +21,8 @@ namespace OrdersService.ServiceTests
                                                 ?? throw new InvalidOperationException($"{nameof(TestServer)} not initialized.");
 
         public static IBus TestBus { get; private set; }
+        public static WireMockServer MockApi { get; private set; }
+
 
         public static void Initialize()
         {
@@ -30,7 +31,13 @@ namespace OrdersService.ServiceTests
             // Also, the underlying TestServer creation has a race condition, calling it from tests running in parallel may cause multiple servers to be spawned.
             Instance.CreateDefaultClient();
 
-            TestBus = Configure.With(new BuiltinHandlerActivator().Register(()=>MessageDispatcher.Instance))
+            TestBus = SetupTestBus().GetAwaiter().GetResult();
+            MockApi = WireMockServer.Start(5002, true);
+        }
+
+        private static async Task<IBus> SetupTestBus()
+        {
+            var testBus = Configure.With(new BuiltinHandlerActivator().Register(() => MessageDispatcher.Instance))
                 .Transport(t => t.UseFileSystem(".queues", "orders-test-queue"))
                 .Subscriptions(t => t.UseJsonFile(".subscriptions.json"))
                 .Routing(r => r.TypeBased()
@@ -41,30 +48,16 @@ namespace OrdersService.ServiceTests
                     .Map<RejectOrderCommand>("orders-queue")
                 )
                 .Start();
-
-            TestBus.Subscribe<OrderCreatedEvent>().GetAwaiter().GetResult();
-            TestBus.Subscribe<OrderStatusUpdatedEvent>().GetAwaiter().GetResult();
-            TestBus.Subscribe<OrderProductDispatchEvent>().GetAwaiter().GetResult();
+            await testBus.Subscribe<OrderCreatedEvent>();
+            await testBus.Subscribe<OrderStatusUpdatedEvent>();
+            await testBus.Subscribe<OrderProductDispatchEvent>();
+            return testBus;
         }
 
         public static void Dispose()
         {
             Instance?.Dispose();
             TestBus?.Dispose();
-        }
-    }
-
-    class MessageDispatcher : IMessageSource, IHandleMessages<object>
-    {
-        public static readonly MessageDispatcher Instance = new MessageDispatcher();
-        public event Action<object> OnMessage;
-        
-
-        private MessageDispatcher() { }
-        public Task Handle(object message)
-        {
-            OnMessage?.Invoke(message);
-            return Task.CompletedTask;
         }
     }
 }

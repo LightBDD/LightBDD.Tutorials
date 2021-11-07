@@ -1,5 +1,4 @@
 ﻿using System;
-using OrdersService.Controllers;
 
 namespace OrdersService.Models
 {

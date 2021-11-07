@@ -14,6 +14,6 @@ namespace OrdersService.Clients
             _client = client;
         }
 
-        public async Task<bool> IsValidAccount(Guid accountId) => await _client.GetFromJsonAsync<bool>($"/account/{accountId}/validate");
+        public async Task<bool> IsValidAccount(Guid accountId) => await _client.GetFromJsonAsync<bool>($"/accounts/{accountId}/validate");
     }
 }

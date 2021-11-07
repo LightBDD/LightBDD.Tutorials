@@ -14,7 +14,7 @@ using OrdersService.Models;
 using Shouldly;
 using Xunit;
 
-namespace OrdersService.ServiceTests
+namespace OrdersService.ServiceTests.Features
 {
     public partial class Managing_orders : FeatureFixture, IDisposable
     {
@@ -30,6 +30,13 @@ namespace OrdersService.ServiceTests
 
         private Task Given_a_valid_account()
         {
+            TestServer.MockApi.ConfigureGetAccount(_accountId, true);
+            return Task.CompletedTask;
+        }
+
+        private Task Given_an_invalid_account()
+        {
+            TestServer.MockApi.ConfigureGetAccount(_accountId, false);
             return Task.CompletedTask;
         }
 

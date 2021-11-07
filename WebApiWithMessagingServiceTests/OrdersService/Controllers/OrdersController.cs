@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using OrdersService.Clients;
 using OrdersService.Messages;
@@ -30,8 +27,8 @@ namespace OrdersService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
-            /*if (!await _accountServiceClient.IsValidAccount(request.AccountId))
-                return BadRequest("Invalid account");*/
+            if (!await _accountServiceClient.IsValidAccount(request.AccountId))
+                return BadRequest("Invalid account");
 
             var order = new Order { Id = Guid.NewGuid(), AccountId = request.AccountId, Products = request.Products, Status = OrderStatus.Created };
             _repository.Upsert(order);
