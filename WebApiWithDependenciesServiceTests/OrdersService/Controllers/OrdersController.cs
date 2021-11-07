@@ -30,7 +30,14 @@ namespace OrdersService.Controllers
             if (!await _accountServiceClient.IsValidAccount(request.AccountId))
                 return BadRequest("Invalid account");
 
-            var order = new Order { Id = Guid.NewGuid(), AccountId = request.AccountId, Products = request.Products, Status = OrderStatus.Created };
+            var order = new Order
+            {
+                Id = Guid.NewGuid(),
+                AccountId = request.AccountId,
+                Products = request.Products,
+                Status = OrderStatus.Created
+            };
+
             _repository.Upsert(order);
             await _bus.Publish(new OrderCreatedEvent { OrderId = order.Id });
             return CreatedAtAction("GetById", new { orderId = order.Id }, order);

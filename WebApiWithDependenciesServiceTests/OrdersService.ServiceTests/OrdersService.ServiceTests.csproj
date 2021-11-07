@@ -4,7 +4,7 @@
     <TargetFramework>net5</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LightBDD.XUnit2" Version="3.4.0-pre" />
+    <PackageReference Include="LightBDD.XUnit2" Version="3.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="5.0.11" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Shouldly" Version="4.0.3" />

@@ -13,3 +13,8 @@ At this moment, the repository does not contain many samples, but it will grow o
   
   **Technologies:** AspNetCore, Swashbuckle, LiteDB  
   **LightBDD concepts:** partial classes, parallel execution, async steps, [State\<T>](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use), [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [tabular parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable)
+*  [Web Api With Dependencies Service Tests](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiWithDependenciesServiceTests)  
+  A sample project showing LightBDD Service Tests using WireMock for mocking dependent APIs and Rebus for message based communication.  
+  
+  **Technologies:** AspNetCore, Swashbuckle, LiteDB, Rebus, WireMock 
+  **LightBDD concepts:** partial classes, parallel execution, async steps, [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), MessageListener
