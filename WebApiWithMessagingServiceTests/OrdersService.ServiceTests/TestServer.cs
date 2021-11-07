@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using OrdersService.Messages;
@@ -9,30 +8,34 @@ using Rebus.Config;
 using Rebus.Persistence.FileSystem;
 using Rebus.Routing.TypeBased;
 using Rebus.Transport.FileSystem;
-using WireMock.Server;
 
 namespace OrdersService.ServiceTests
 {
     internal static class TestServer
     {
-        private static WebApplicationFactory<Startup> Instance { get; set; }
+        private static WebApplicationFactory<Startup> _testServer;
 
-        public static HttpClient GetClient() => Instance?.CreateDefaultClient()
-                                                ?? throw new InvalidOperationException($"{nameof(TestServer)} not initialized.");
+        /// <summary>
+        /// HttpClient to the OrdersService under test.
+        /// </summary>
+        public static HttpClient Client { get; private set; }
 
-        public static IBus TestBus { get; private set; }
-        public static WireMockServer MockApi { get; private set; }
+        /// <summary>
+        /// Message Bus to communicate with OrdersService under test.
+        /// </summary>
+        public static IBus MessageBus { get; private set; }
 
+        /// <summary>
+        /// Mock Account Service to control Account Service API calls
+        /// </summary>
+        public static MockAccountService MockAccountService { get; private set; }
 
         public static void Initialize()
         {
-            Instance = new WebApplicationFactory<Startup>();
-            // Actually the WebApplicationFactory has a problem that until CreateDefaultClient() is called, no underlying TestServer instance is created.
-            // Also, the underlying TestServer creation has a race condition, calling it from tests running in parallel may cause multiple servers to be spawned.
-            Instance.CreateDefaultClient();
-
-            TestBus = SetupTestBus().GetAwaiter().GetResult();
-            MockApi = WireMockServer.Start(5002, true);
+            _testServer = new WebApplicationFactory<Startup>();
+            Client = _testServer.CreateDefaultClient();
+            MessageBus = SetupTestBus().GetAwaiter().GetResult();
+            MockAccountService = new MockAccountService();
         }
 
         private static async Task<IBus> SetupTestBus()
@@ -56,8 +59,9 @@ namespace OrdersService.ServiceTests
 
         public static void Dispose()
         {
-            Instance?.Dispose();
-            TestBus?.Dispose();
+            _testServer?.Dispose();
+            MessageBus?.Dispose();
+            MockAccountService?.Dispose();
         }
     }
 }

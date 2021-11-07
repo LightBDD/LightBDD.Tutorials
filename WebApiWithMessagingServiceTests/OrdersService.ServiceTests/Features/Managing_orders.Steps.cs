@@ -30,20 +30,20 @@ namespace OrdersService.ServiceTests.Features
 
         private Task Given_a_valid_account()
         {
-            TestServer.MockApi.ConfigureGetAccount(_accountId, true);
+            TestServer.MockAccountService.ConfigureGetAccount(_accountId, true);
             return Task.CompletedTask;
         }
 
         private Task Given_an_invalid_account()
         {
-            TestServer.MockApi.ConfigureGetAccount(_accountId, false);
+            TestServer.MockAccountService.ConfigureGetAccount(_accountId, false);
             return Task.CompletedTask;
         }
 
         private async Task When_create_order_endpoint_is_called_for_products(params string[] products)
         {
             var request = new CreateOrderRequest { AccountId = _accountId, Products = products };
-            _response = await TestServer.GetClient().PostAsJsonAsync("/orders", request);
+            _response = await TestServer.Client.PostAsJsonAsync("/orders", request);
         }
 
         private Task Then_response_should_have_status(Verifiable<HttpStatusCode> status)
@@ -65,7 +65,7 @@ namespace OrdersService.ServiceTests.Features
 
         private async Task Then_get_order_endpoint_should_return_order_with_status(Verifiable<OrderStatus> status)
         {
-            var order = await TestServer.GetClient().GetFromJsonAsync<Order>($"/orders/{_order.Id}");
+            var order = await TestServer.Client.GetFromJsonAsync<Order>($"/orders/{_order.Id}");
             status.SetActual(order!.Status);
         }
 
@@ -87,12 +87,12 @@ namespace OrdersService.ServiceTests.Features
 
         private async Task When_RejectOrderCommand_is_sent_for_this_order()
         {
-            await TestServer.TestBus.Send(new RejectOrderCommand { OrderId = _order.Id });
+            await TestServer.MessageBus.Send(new RejectOrderCommand { OrderId = _order.Id });
         }
 
         private async Task When_ApproveOrderCommand_is_sent_for_this_order()
         {
-            await TestServer.TestBus.Send(new ApproveOrderCommand { OrderId = _order.Id });
+            await TestServer.MessageBus.Send(new ApproveOrderCommand { OrderId = _order.Id });
         }
 
         private async Task Then_OrderStatusUpdatedEvent_should_be_published_with_status(OrderStatus status)
