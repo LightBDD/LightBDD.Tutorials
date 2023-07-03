@@ -12,4 +12,4 @@ At this moment, the repository does not contain many samples, but it will grow o
   A sample project showing how to use LightBDD to service test Web Api project.  
   
   **Technologies:** AspNetCore, Swashbuckle, LiteDB  
-  **LightBDD concepts:** partial classes, parallel execution, async steps, [State\<T>](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use), [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [tabular parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable)
+  **LightBDD concepts:** partial classes, parallel execution, async steps, [State\<T>](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use), [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [tabular parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable), [global setup](https://github.com/LightBDD/LightBDD/wiki/SetUp-and-TearDown#global-setup-and-teardown)
