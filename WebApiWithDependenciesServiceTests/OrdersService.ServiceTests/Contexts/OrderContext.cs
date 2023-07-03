@@ -8,68 +8,75 @@ using LightBDD.Framework;
 using LightBDD.Framework.Messaging;
 using LightBDD.Framework.Parameters;
 using LightBDD.Framework.Scenarios;
-using LightBDD.XUnit2;
 using OrdersService.Messages;
 using OrdersService.Models;
+using OrdersService.ServiceTests.Infrastructure;
+using Rebus.Bus;
 using Shouldly;
 using Xunit;
 
-namespace OrdersService.ServiceTests.Features
+namespace OrdersService.ServiceTests.Contexts
 {
-    public partial class Managing_orders : FeatureFixture, IDisposable
+    internal class OrderContext : IDisposable
     {
-        private readonly Guid _accountId = Guid.NewGuid();
+        private readonly MockAccountService _accountService;
+        private readonly IBus _messageBus;
         private readonly MessageListener _listener;
+        private readonly OrdersClient _client;
+        private readonly Guid _accountId = Guid.NewGuid();
         private HttpResponseMessage _response;
         private Order _order;
 
-        public Managing_orders()
+        public OrderContext(OrdersClient client, MockAccountService accountService, TestBus testBus)
         {
-            _listener = MessageListener.Start(MessageDispatcher.Instance);
+            _client = client;
+            _accountService = accountService;
+            _messageBus = testBus.MessageBus;
+            _listener = MessageListener.Start(testBus.Dispatcher);
         }
 
-        private Task Given_a_valid_account()
+        public Task Given_a_valid_account()
         {
-            TestServer.MockAccountService.ConfigureGetAccount(_accountId, true);
+            _accountService.ConfigureGetAccount(_accountId, true);
             return Task.CompletedTask;
         }
 
-        private Task Given_an_invalid_account()
+        public Task Given_an_invalid_account()
         {
-            TestServer.MockAccountService.ConfigureGetAccount(_accountId, false);
+            _accountService.ConfigureGetAccount(_accountId, false);
             return Task.CompletedTask;
         }
 
-        private async Task When_create_order_endpoint_is_called_for_products(params string[] products)
+        public async Task When_create_order_endpoint_is_called_for_products(params string[] products)
         {
             var request = new CreateOrderRequest { AccountId = _accountId, Products = products };
-            _response = await TestServer.Client.PostAsJsonAsync("/orders", request);
+            _response = await _client.CreateOrder(request);
         }
 
-        private Task Then_response_should_have_status(Verifiable<HttpStatusCode> status)
+        public Task Then_response_should_have_status(Verifiable<HttpStatusCode> status)
         {
             status.SetActual(_response.StatusCode);
             return Task.CompletedTask;
         }
 
-        private async Task Then_response_should_contain_order()
+        public async Task Then_response_should_contain_order()
         {
             _order = await _response.Content.ReadFromJsonAsync<Order>();
             Assert.NotEqual(Guid.Empty, _order?.Id);
         }
 
-        private async Task Then_OrderCreatedEvent_should_be_published()
+        public async Task Then_OrderCreatedEvent_should_be_published()
         {
             await _listener.EnsureReceived<OrderCreatedEvent>(x => x.OrderId == _order.Id);
         }
 
-        private async Task Then_get_order_endpoint_should_return_order_with_status(Verifiable<OrderStatus> status)
+        public async Task Then_get_order_endpoint_should_return_order_with_status(Verifiable<OrderStatus> status)
         {
-            var order = await TestServer.Client.GetFromJsonAsync<Order>($"/orders/{_order.Id}");
+            var order = await _client.GetOrder(_order.Id);
             status.SetActual(order!.Status);
         }
 
-        private Task<CompositeStep> Given_a_created_order()
+        public Task<CompositeStep> Given_a_created_order()
         {
             return Task.FromResult(CompositeStep.DefineNew()
                 .AddAsyncSteps(
@@ -85,22 +92,22 @@ namespace OrdersService.ServiceTests.Features
             _listener?.Dispose();
         }
 
-        private async Task When_RejectOrderCommand_is_sent_for_this_order()
+        public async Task When_RejectOrderCommand_is_sent_for_this_order()
         {
-            await TestServer.MessageBus.Send(new RejectOrderCommand { OrderId = _order.Id });
+            await _messageBus.Send(new RejectOrderCommand { OrderId = _order.Id });
         }
 
-        private async Task When_ApproveOrderCommand_is_sent_for_this_order()
+        public async Task When_ApproveOrderCommand_is_sent_for_this_order()
         {
-            await TestServer.MessageBus.Send(new ApproveOrderCommand { OrderId = _order.Id });
+            await _messageBus.Send(new ApproveOrderCommand { OrderId = _order.Id });
         }
 
-        private async Task Then_OrderStatusUpdatedEvent_should_be_published_with_status(OrderStatus status)
+        public async Task Then_OrderStatusUpdatedEvent_should_be_published_with_status(OrderStatus status)
         {
             await _listener.EnsureReceived<OrderStatusUpdatedEvent>(x => x.OrderId == _order.Id && x.Status == status);
         }
 
-        private async Task Then_OrderProductDispatchEvent_should_be_published_for_each_product()
+        public async Task Then_OrderProductDispatchEvent_should_be_published_for_each_product()
         {
             var messages = await _listener.EnsureReceivedMany<OrderProductDispatchEvent>(_order.Products.Length, x => x.OrderId == _order.Id);
             messages.Select(m => m.Product).ToArray().ShouldBe(_order.Products, true);

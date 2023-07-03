@@ -10,9 +10,9 @@ using OrdersService.Clients;
 using OrdersService.Handlers;
 using OrdersService.Messages;
 using OrdersService.Repositories;
+using Rebus.Config;
 using Rebus.Persistence.FileSystem;
 using Rebus.Routing.TypeBased;
-using Rebus.ServiceProvider;
 using Rebus.Transport.FileSystem;
 
 namespace OrdersService
@@ -36,7 +36,8 @@ namespace OrdersService
             });
 
             services.AddSingleton<OrdersRepository>();
-            services.AddSingleton(new LiteDatabase(Configuration.GetConnectionString("db")));
+            // using factory method to close LiteDatabase upon disposal
+            services.AddSingleton(_ => new LiteDatabase(Configuration.GetConnectionString("db")));
             services.AddHttpClient<AccountServiceClient>(cfg => cfg.BaseAddress = new Uri(Configuration["Clients:AccountService"]));
 
             services.AddRebus(x => x
@@ -66,7 +67,6 @@ namespace OrdersService
             {
                 endpoints.MapControllers();
             });
-            app.ApplicationServices.UseRebus();
         }
     }
 }

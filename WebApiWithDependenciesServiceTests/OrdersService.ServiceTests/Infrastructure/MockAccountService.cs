@@ -4,8 +4,11 @@ using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 
-namespace OrdersService.ServiceTests
+namespace OrdersService.ServiceTests.Infrastructure
 {
+    /// <summary>
+    /// Mock Account Service to control Account Service API calls
+    /// </summary>
     public class MockAccountService : IDisposable
     {
         private const int AccountServicePort = 5002;
@@ -22,7 +25,7 @@ namespace OrdersService.ServiceTests
                 .RespondWith(Response.Create().WithStatusCode(HttpStatusCode.OK).WithBodyAsJson(response));
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             _server?.Dispose();
         }

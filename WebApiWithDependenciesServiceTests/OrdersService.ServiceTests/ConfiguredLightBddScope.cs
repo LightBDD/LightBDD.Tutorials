@@ -1,6 +1,10 @@
-﻿using LightBDD.Core.Configuration;
+﻿using System;
+using System.IO;
+using LightBDD.Core.Configuration;
+using LightBDD.Core.Dependencies;
 using LightBDD.XUnit2;
 using OrdersService.ServiceTests;
+using OrdersService.ServiceTests.Infrastructure;
 
 [assembly: ClassCollectionBehavior(AllowTestParallelization = true)]
 [assembly: ConfiguredLightBddScope]
@@ -11,17 +15,22 @@ namespace OrdersService.ServiceTests
     {
         protected override void OnConfigure(LightBddConfiguration configuration)
         {
-            // LightBDD configuration
+            configuration.DependencyContainerConfiguration()
+                .UseDefault(ConfigureDI);
+
+            configuration.ExecutionExtensionsConfiguration()
+                //ensures the db is deleted as last one (reverse tear down order)
+                .RegisterGlobalTearDown("db cleanup", () => File.Delete(Path.Combine(AppContext.BaseDirectory, ".orders.db")))
+                //ensures the TestServer is initialized before TestBus and disposed after
+                .RegisterGlobalSetUp<TestServer>()
+                .RegisterGlobalSetUp<TestBus>();
         }
 
-        protected override void OnSetUp()
+        private void ConfigureDI(IDefaultContainerConfigurator cfg)
         {
-            TestServer.Initialize();
-        }
-
-        protected override void OnTearDown()
-        {
-            TestServer.Dispose();
+            cfg.RegisterType<TestServer>(InstanceScope.Single);
+            cfg.RegisterType<TestBus>(InstanceScope.Single);
+            cfg.RegisterType<MockAccountService>(InstanceScope.Single);
         }
     }
 }
