@@ -1,7 +1,7 @@
 # Web Api Service Tests
 
 **Technologies:** AspNetCore, Swashbuckle, LiteDB  
-**LightBDD concepts:** partial classes, parallel execution, async steps, [State\<T>](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use), [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [tabular parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable)
+**LightBDD concepts:** partial classes, parallel execution, async steps, [State\<T>](https://github.com/LightBDD/LightBDD/wiki/Scenario-State-Management#ensuring-state-is-initialized-before-use), [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [tabular parameters](https://github.com/LightBDD/LightBDD/wiki/Advanced-Step-Parameters#verifiabledatatable), [global setup](https://github.com/LightBDD/LightBDD/wiki/SetUp-and-TearDown#global-setup-and-teardown)
 
 This is a sample solution showing how to use LightBDD to service test Web Api project.
 
@@ -14,7 +14,7 @@ It consist of two projects:
 1. Open `cmd.exe` in solution directory
 2. Run [run-tests.cmd](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/run-tests.cmd).
 
-The command will run the tests and open the `FeaturesReport.html` produced in `CustomerApi.ServiceTests\bin\Debug\net5\Reports\` directory.
+The command will run the tests and open the `FeaturesReport.html` produced in `CustomerApi.ServiceTests\bin\Debug\net7\Reports\` directory.
 
 ## CustomerApi
 
@@ -33,7 +33,7 @@ The repository does not allow to create multiple customers with the same email a
 * the exceptions are automatically converted to either `400` or `500` HTTP Status Code and `Errors` model by [HandleExceptionsFilterAttribute](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi/Filters/HandleExceptionsFilterAttribute.cs) method.
 The error handling is configured in [Startup.ConfigureServices()](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi/Startup.cs#L26).
 
-Finally, the [Swashbuckle Swagger](https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.2) has been added to the Api, allowing to play with it by going to `https://localhost:5001/` when application is running.
+Finally, the [Swashbuckle Swagger](https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle) has been added to the Api, allowing to play with it by going to `https://localhost:5001/` when application is running.
 
 ## CustomerApi.ServiceTests
 
@@ -43,7 +43,7 @@ The CustomerApi.ServiceTests uses LightBDD to run behavioral tests against Custo
 
 The `WebApplicationFactory<Startup>` is instantiated once for the whole test run. It is managed by [TestServer](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/TestServer.cs) static class, that offers a `GetClient()` method to obtain the `HttpClient` used later by tests.
 
-The instantiation and disposal of the `TestServer` is handled by the [ConfiguredLightBddScope](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs)  `OnSetUp()` and `OnTearDown()` methods, guaranteeing to execute once, before any and after all tests in the assembly.
+The instantiation and disposal of the `TestServer` is handled by the [ConfiguredLightBddScope](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiServiceTests/CustomerApi.ServiceTests/ConfiguredLightBddScope.cs) which leverages [global setup](https://github.com/LightBDD/LightBDD/wiki/SetUp-and-TearDown#global-setup-and-teardown) capability to start server before tests and dispose it after all tests are completed. Upon completion, "customers.db" database is also deleted, which happens after the `TestServer` is terminated (the tear down operations are executed in reverse registration order).
 
 **Why the one test server instance is important?**  
 Well, the service tests treats the service as a black box, which means that when it is initialized, all potentially complex service startup has to be performed (including database initialization, cache population, service warming-up routines and anything else that the service may be doing during startup). Instantiating the `TestServer` per test or even per test class will introduce the unnecessary overhead that will affect the test execution time.
