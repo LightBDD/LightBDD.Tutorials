@@ -14,7 +14,7 @@ It consist of two projects:
 1. Open `cmd.exe` in solution directory
 2. Run [run-tests.cmd](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/run-tests.cmd).
 
-The command will run the tests and open the `FeaturesReport.html` produced in `OrdersApi.ServiceTests\bin\Debug\net5\Reports\` directory.
+The command will run the tests and open the `FeaturesReport.html` produced in `OrderService.ServiceTests\bin\Debug\net7\Reports\` directory.
 
 ## OrderService
 
