@@ -17,4 +17,4 @@ At this moment, the repository does not contain many samples, but it will grow o
   A sample project showing LightBDD Service Tests using WireMock for mocking dependent APIs and Rebus for message based communication.  
   
   **Technologies:** AspNetCore, Swashbuckle, LiteDB, Rebus, WireMock 
-  **LightBDD concepts:** partial classes, parallel execution, async steps, [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), MessageListener
+  **LightBDD concepts:** partial classes, parallel execution, async steps, [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [MessageListener](https://github.com/LightBDD/LightBDD/wiki/Test-Utilities#messagelistener), [DI containers](https://github.com/LightBDD/LightBDD/wiki/DI-Containers#default-di-container)
