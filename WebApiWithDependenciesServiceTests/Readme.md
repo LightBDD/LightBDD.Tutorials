@@ -6,8 +6,8 @@
 This is a sample project showing LightBDD Service Tests using WireMock for mocking dependent APIs and Rebus for message based communication.
 
 It consist of two projects:
-* [OrdersApi](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiWithDependenciesServiceTests/OrdersApi) - AspNetCore WebApi project,
-* [OrdersApi.ServiceTests](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiWithDependenciesServiceTests/OrdersApi.ServiceTests) - Service tests project based on xunit and LightBDD.
+* [OrderService](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiWithDependenciesServiceTests/OrderService) - AspNetCore WebApi project,
+* [OrderService.ServiceTests](https://github.com/LightBDD/LightBDD.Tutorials/tree/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests) - Service tests project based on xunit and LightBDD.
 
 ## Quick run
 
