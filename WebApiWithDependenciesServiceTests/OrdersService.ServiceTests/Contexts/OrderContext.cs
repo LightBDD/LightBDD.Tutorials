@@ -27,6 +27,7 @@ namespace OrdersService.ServiceTests.Contexts
         private HttpResponseMessage _response;
         private Order _order;
 
+        // Uses DI container to resolve these dependencies
         public OrderContext(OrdersServiceClient client, MockAccountService accountService, TestBus testBus)
         {
             _client = client;
@@ -87,11 +88,6 @@ namespace OrdersService.ServiceTests.Contexts
                 .Build());
         }
 
-        public void Dispose()
-        {
-            _listener?.Dispose();
-        }
-
         public async Task When_RejectOrderCommand_is_sent_for_this_order()
         {
             await _messageBus.Send(new RejectOrderCommand { OrderId = _order.Id });
@@ -112,6 +108,11 @@ namespace OrdersService.ServiceTests.Contexts
             var messages = await _listener.EnsureReceivedMany<OrderProductDispatchEvent>(_order.Products.Length, x => x.OrderId == _order.Id);
             messages.Select(m => m.Product).ToArray()
                 .ShouldBe(_order.Products, true);
+        }
+
+        public void Dispose()
+        {
+            _listener?.Dispose();
         }
     }
 }
