@@ -41,7 +41,8 @@ namespace CustomerApi
         private void RegisterDependencies(IServiceCollection services)
         {
             services.AddSingleton<ICustomerRepository, CustomerRepository>();
-            services.AddSingleton(new LiteDatabase(Configuration.GetConnectionString("db")));
+            // Using factory method guarantees the DI container will close LiteDatabase connection upon disposal
+            services.AddSingleton(_ => new LiteDatabase(Configuration.GetConnectionString("db")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
