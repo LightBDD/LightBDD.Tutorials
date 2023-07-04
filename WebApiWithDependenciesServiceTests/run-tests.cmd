@@ -1,2 +1,2 @@
-dotnet test OrdersService.ServiceTests\OrdersService.ServiceTests.csproj --logger:"console;verbosity=detailed"
-start OrdersService.ServiceTests\bin\Debug\net7\Reports\FeaturesReport.html
+dotnet test OrderService.ServiceTests\OrderService.ServiceTests.csproj --logger:"console;verbosity=detailed"
+start OrderService.ServiceTests\bin\Debug\net7\Reports\FeaturesReport.html
