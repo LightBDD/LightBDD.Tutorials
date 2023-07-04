@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rebus" Version="7.1.0" />
+    <PackageReference Include="Rebus.AzureServiceBus" Version="9.3.5" />
+    <PackageReference Include="Rebus.ServiceProvider" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="LiteDB" Version="5.0.16" />
+  </ItemGroup>
+
+</Project>
