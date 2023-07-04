@@ -13,10 +13,13 @@ namespace OrdersService.ServiceTests.Infrastructure
     internal class TestBus : IGlobalResourceSetUp
     {
         /// <summary>
-        /// Message Bus to communicate with OrdersService under test.
+        /// Message Bus to communicate with OrdersService.
         /// </summary>
         public IBus MessageBus { get; }
 
+        /// <summary>
+        /// Message dispatcher allowing to hook-up into events subscribed on Rebus file queues.
+        /// </summary>
         public MessageDispatcher Dispatcher { get; } = new();
 
         public TestBus()

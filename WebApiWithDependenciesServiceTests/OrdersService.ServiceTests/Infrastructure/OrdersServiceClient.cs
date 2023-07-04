@@ -6,11 +6,14 @@ using OrdersService.Models;
 
 namespace OrdersService.ServiceTests.Infrastructure;
 
-internal class OrdersClient
+/// <summary>
+/// OrdersService client allowing to interact with service REST Api
+/// </summary>
+internal class OrdersServiceClient
 {
     private readonly HttpClient _client;
 
-    public OrdersClient(TestServer server)
+    public OrdersServiceClient(TestServer server)
     {
         _client = server.Client;
     }

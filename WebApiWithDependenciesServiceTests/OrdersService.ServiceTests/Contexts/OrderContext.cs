@@ -22,12 +22,12 @@ namespace OrdersService.ServiceTests.Contexts
         private readonly MockAccountService _accountService;
         private readonly IBus _messageBus;
         private readonly MessageListener _listener;
-        private readonly OrdersClient _client;
+        private readonly OrdersServiceClient _client;
         private readonly Guid _accountId = Guid.NewGuid();
         private HttpResponseMessage _response;
         private Order _order;
 
-        public OrderContext(OrdersClient client, MockAccountService accountService, TestBus testBus)
+        public OrderContext(OrdersServiceClient client, MockAccountService accountService, TestBus testBus)
         {
             _client = client;
             _accountService = accountService;

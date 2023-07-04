@@ -28,7 +28,7 @@ namespace OrdersService.Controllers
         }
 
         /// <summary>
-        /// Creates new order and publishes OrderCreatedEvent
+        /// Creates a new order and publishes OrderCreatedEvent
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
