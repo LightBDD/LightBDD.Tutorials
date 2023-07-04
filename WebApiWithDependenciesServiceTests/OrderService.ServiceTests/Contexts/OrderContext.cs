@@ -22,13 +22,13 @@ namespace OrderService.ServiceTests.Contexts
         private readonly MockAccountService _accountService;
         private readonly IBus _messageBus;
         private readonly MessageListener _listener;
-        private readonly OrdersServiceClient _client;
+        private readonly OrderServiceClient _client;
         private readonly Guid _accountId = Guid.NewGuid();
         private HttpResponseMessage _response;
         private Order _order;
 
         // Uses DI container to resolve these dependencies
-        public OrderContext(OrdersServiceClient client, MockAccountService accountService, TestBus testBus)
+        public OrderContext(OrderServiceClient client, MockAccountService accountService, TestBus testBus)
         {
             _client = client;
             _accountService = accountService;

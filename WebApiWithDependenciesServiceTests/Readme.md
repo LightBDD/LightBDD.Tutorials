@@ -58,7 +58,7 @@ _Please note that the solution does not contain implementations of AccountServic
 ### Infrastructure & Global Setup
 
 The service tests uses three infrastructure components to run:
-* [TestServer](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests/Infrastructure/TestServer.cs) that is responsible for instantiating OrderService under test and allow interaction with it's Api via [OrdersClient](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests/Infrastructure/OrdersClient.cs),
+* [TestServer](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests/Infrastructure/TestServer.cs) that is responsible for instantiating OrderService under test and allow interaction with it's Api via [OrderServiceClient](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests/Infrastructure/OrderServiceClient.cs),
 * [TestBus](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests/Infrastructure/TestBus.cs) that allows to communicate with OrderService via messaging, where:
   * `MessageBus` property is used to send messages to the OrderService,
   * `Dispatcher` property is used to hook-up into events published by the OrderService,
@@ -107,7 +107,7 @@ public Task Given_an_invalid_account()
 
 #### Calling service under test Api
 
-The `When_create_order_endpoint_is_called_for_products()` / `Then_get_order_endpoint_should_return_order_with_status()` steps interact with OrderService via its REST Api, using [OrdersClient](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests/Infrastructure/OrdersClient.cs).
+The `When_create_order_endpoint_is_called_for_products()` / `Then_get_order_endpoint_should_return_order_with_status()` steps interact with OrderService via its REST Api, using [OrderServiceClient](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService.ServiceTests/Infrastructure/OrderServiceClient.cs).
 
 ```c#
 public async Task When_create_order_endpoint_is_called_for_products(params string[] products)
