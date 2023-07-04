@@ -38,7 +38,7 @@ namespace OrderService
             services.AddSingleton<OrdersRepository>();
             // using factory method to close LiteDatabase upon disposal
             services.AddSingleton(_ => new LiteDatabase(Configuration.GetConnectionString("db")));
-            services.AddHttpClient<AccountServiceClient>(cfg => cfg.BaseAddress = new Uri(Configuration["Clients:AccountService"]));
+            services.AddHttpClient<AccountServiceClient>(cfg => cfg.BaseAddress = new Uri(Configuration["Clients:AccountService"]!));
 
             services.AddRebus(x => x
                 .Transport(t => t.UseFileSystem(Configuration["Rebus:QueueDirectory"], "orders-queue"))
