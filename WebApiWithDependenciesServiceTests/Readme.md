@@ -1,4 +1,4 @@
-# Web Api Service Tests
+# Web Api Service Tests with mocked dependencies
 
 **Technologies:** AspNetCore, Swashbuckle, LiteDB, Rebus, WireMock 
 **LightBDD concepts:** partial classes, parallel execution, async steps, [composite steps](https://github.com/LightBDD/LightBDD/wiki/Composite-Steps-Definition), [MessageListener](https://github.com/LightBDD/LightBDD/wiki/Test-Utilities#messagelistener), [DI containers](https://github.com/LightBDD/LightBDD/wiki/DI-Containers#default-di-container), [global setup](https://github.com/LightBDD/LightBDD/wiki/SetUp-and-TearDown#global-setup-and-teardown)
