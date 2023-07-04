@@ -20,30 +20,30 @@ The command will run the tests and open the `FeaturesReport.html` produced in `O
 
 The OrderService is a sample AspNetCore WebApi project, generated with `dotnet new webapi` command and extended for the tutorial purpose with a `/orders` endpoint.
 
-The `/orders` endpoint is implemented in [OrdersController](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrdersApi/Controllers/OrdersController.cs) and allows following operations:
+The `/orders` endpoint is implemented in [OrdersController](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Controllers/OrdersController.cs) and allows following operations:
 * `POST /orders` - creates a new order,
 * `GET /orders/{orderId}` - retrieves an order by ID.
 
-The order data is stored in [LiteDB](http://www.litedb.org/) database, managed by the [OrdersRepository](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrdersApi/Repositories/OrdersRepository.cs) class.  
+The order data is stored in [LiteDB](http://www.litedb.org/) database, managed by the [OrdersRepository](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Repositories/OrdersRepository.cs) class.  
 
 Service uses also [Rebus](https://github.com/rebus-org/Rebus/) framework for asynchronous message communication with other services, which is configured on [Startup](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Startup.cs#L43) to use file-based queueing transport.  
 
 ### Creating new Order
 
-The `POST /orders` operation requires [CreateOrderRequest](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrdersApi/Models/CreateOrderRequest.cs) containing `AccountId` and `Products` properties.  
+The `POST /orders` operation requires [CreateOrderRequest](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Models/CreateOrderRequest.cs) containing `AccountId` and `Products` properties.  
 
 The `AccountId` is first validated by calling AccountService endpoint using [AccountServiceClient.IsValidAccount](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Clients/AccountServiceClient.cs#L17) method.
 
-Upon successful validation, the new order is saved in the database using [OrdersRepository.Upsert](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrdersApi/Repositories/OrdersRepository.cs#L17) method.  
+Upon successful validation, the new order is saved in the database using [OrdersRepository.Upsert](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Repositories/OrdersRepository.cs#L17) method.  
 The controller publishes then the [OrderCreatedEvent](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Messages/OrderCreatedEvent.cs#L5) using service bus.
 
 ### Approving / Rejecting Orders
 
 The order approving or rejection is implemented using messaging and [Rebus](https://github.com/rebus-org/Rebus/) framework.  
 
-The OrderService has [OrderStatusHandler](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Handlers/OrderStatusHandler.cs#L14) which handles [ApproveOrderCommand](https://github.com/LightBDD/LightBDD.Tutorials/blob/I4/WebApiWithDependenciesServiceTests/OrderService/Messages/ApproveOrderCommand.cs) and [RejectOrderCommand](https://github.com/LightBDD/LightBDD.Tutorials/blob/I4/WebApiWithDependenciesServiceTests/OrderService/Messages/RejectOrderCommand.cs) messages.
+The OrderService has [OrderStatusHandler](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Handlers/OrderStatusHandler.cs#L14) which handles [ApproveOrderCommand](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Messages/ApproveOrderCommand.cs) and [RejectOrderCommand](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Messages/RejectOrderCommand.cs) messages.
 
-For `ApproveOrderCommand` it updates order status to `Complete` and publishes [OrderProductDispatchEvent](https://github.com/LightBDD/LightBDD.Tutorials/blob/I4/WebApiWithDependenciesServiceTests/OrderService/Messages/OrderProductDispatchEvent.cs) for each product associated with an order.
+For `ApproveOrderCommand` it updates order status to `Complete` and publishes [OrderProductDispatchEvent](https://github.com/LightBDD/LightBDD.Tutorials/blob/master/WebApiWithDependenciesServiceTests/OrderService/Messages/OrderProductDispatchEvent.cs) for each product associated with an order.
 
 For `RejectOrderCommand` it just updates order status to `Rejected`.
 
