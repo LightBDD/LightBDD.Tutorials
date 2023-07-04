@@ -8,6 +8,9 @@ using Rebus.Handlers;
 
 namespace OrdersService.Handlers
 {
+    /// <summary>
+    /// Order status handler that covers scenarios of approving and rejecting orders
+    /// </summary>
     public class OrderStatusHandler : IHandleMessages<ApproveOrderCommand>, IHandleMessages<RejectOrderCommand>
     {
         private readonly OrdersRepository _repository;
@@ -19,6 +22,9 @@ namespace OrdersService.Handlers
             _bus = bus;
         }
 
+        /// <summary>
+        /// Updates order status to Complete and publish OrderProductDispatchEvent for each ordered product
+        /// </summary>
         public async Task Handle(ApproveOrderCommand message)
         {
             var order = await UpdateOrderStatus(message.OrderId, OrderStatus.Complete);
@@ -29,6 +35,10 @@ namespace OrdersService.Handlers
                 await _bus.Publish(new OrderProductDispatchEvent { OrderId = order.Id, Product = product });
         }
 
+
+        /// <summary>
+        /// Updates order status to rejected
+        /// </summary>
         public async Task Handle(RejectOrderCommand message)
         {
             await UpdateOrderStatus(message.OrderId, OrderStatus.Rejected);

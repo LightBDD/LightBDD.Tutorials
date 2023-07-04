@@ -110,7 +110,8 @@ namespace OrdersService.ServiceTests.Contexts
         public async Task Then_OrderProductDispatchEvent_should_be_published_for_each_product()
         {
             var messages = await _listener.EnsureReceivedMany<OrderProductDispatchEvent>(_order.Products.Length, x => x.OrderId == _order.Id);
-            messages.Select(m => m.Product).ToArray().ShouldBe(_order.Products, true);
+            messages.Select(m => m.Product).ToArray()
+                .ShouldBe(_order.Products, true);
         }
     }
 }

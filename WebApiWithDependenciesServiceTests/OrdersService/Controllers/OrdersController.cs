@@ -9,6 +9,9 @@ using Rebus.Bus;
 
 namespace OrdersService.Controllers
 {
+    /// <summary>
+    /// Orders controller responsible for order creation and retrieval of order details.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class OrdersController : ControllerBase
@@ -24,6 +27,9 @@ namespace OrdersService.Controllers
             _repository = repository;
         }
 
+        /// <summary>
+        /// Creates new order and publishes OrderCreatedEvent
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
@@ -39,10 +45,15 @@ namespace OrdersService.Controllers
             };
 
             _repository.Upsert(order);
+
             await _bus.Publish(new OrderCreatedEvent { OrderId = order.Id });
+
             return CreatedAtAction("GetById", new { orderId = order.Id }, order);
         }
 
+        /// <summary>
+        /// Retrieves order details.
+        /// </summary>
         [HttpGet("{orderId}")]
         public IActionResult GetById(Guid orderId)
         {
